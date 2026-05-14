@@ -1,0 +1,84 @@
+{
+  "skill_name": "youtube-channel-audit",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-channel-audit",
+      "prompt": "Hey can you audit my YouTube channel? It's https://youtube.com/@mrbeast — I want to know why my videos aren't getting as many views as I'd like. I've been at this for a while but something feels off. Please go deep on thumbnails, titles, CTR, retention, and what I should change about my content strategy. Also how can I monetize better?",
+      "expected_output": "A comprehensive channel audit covering all sections: channel audit scores, content analysis, algorithm analysis, thumbnail/title analysis, retention analysis, monetization advice, content strategy, and a 30-day growth plan",
+      "files": [],
+      "assertions": [
+        {"name": "Has section-wise scores", "type": "text", "value": "SECTION-WISE SCORES"},
+        {"name": "Has strengths", "type": "text", "value": "STRENGTHS"},
+        {"name": "Has weaknesses", "type": "text", "value": "WEAKNESSES"},
+        {"name": "Has overall rating", "type": "regex", "value": "OVERALL RATING.*\\d+/\\d+"},
+        {"name": "Has growth plan", "type": "text", "value": "GROWTH PLAN"},
+        {"name": "Has content analysis section", "type": "text", "value": "CONTENT ANALYSIS"},
+        {"name": "Has algorithm analysis", "type": "text", "value": "ALGORITHM ANALYSIS"},
+        {"name": "Has thumbnail/title analysis", "type": "text", "value": "THUMBNAIL &"},
+        {"name": "Has retention analysis", "type": "text", "value": "RETENTION ANALYSIS"},
+        {"name": "Has monetization section", "type": "text", "value": "MONETIZATION"},
+        {"name": "Has competitor analysis", "type": "text", "value": "COMPETITOR"},
+        {"name": "Has advanced insights", "type": "text", "value": "ADVANCED INSIGHTS"},
+        {"name": "Has priority fixes", "type": "text", "value": "PRIORITY FIXES"},
+        {"name": "Has 90-day roadmap", "type": "text", "value": "90-DAY"},
+        {"name": "Addresses MrBeast channel", "type": "text", "value": "MrBeast"},
+        {"name": "Has CTR discussion", "type": "text", "value": "CTR"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "video-analysis",
+      "prompt": "I just posted a new video and it's flopping. Can you tell me why? Here's the link: https://youtube.com/watch?v=9bZkp7q19f0 — I thought this would do well but CTR is only 3.2% and retention is like 25%. What's wrong with the thumbnail, title, and the first 30 seconds? Be brutally honest please.",
+      "expected_output": "Specific thumbnail/title CTR analysis, retention drop-off points, hook critique for the first 30 seconds, alternative title and thumbnail suggestions, and actionable fixes",
+      "files": [],
+      "assertions": [
+        {"name": "Has section-wise scores", "type": "text", "value": "SECTION-WISE SCORES"},
+        {"name": "Has strengths", "type": "text", "value": "STRENGTHS"},
+        {"name": "Has weaknesses", "type": "text", "value": "WEAKNESSES"},
+        {"name": "Has overall rating", "type": "regex", "value": "OVERALL RATING.*\\d+/\\d+"},
+        {"name": "Has growth plan", "type": "text", "value": "GROWTH PLAN"},
+        {"name": "Has content analysis section", "type": "text", "value": "CONTENT ANALYSIS"},
+        {"name": "Has algorithm analysis", "type": "text", "value": "ALGORITHM ANALYSIS"},
+        {"name": "Has thumbnail/title analysis", "type": "text", "value": "THUMBNAIL"},
+        {"name": "Has retention analysis", "type": "text", "value": "RETENTION ANALYSIS"},
+        {"name": "Has monetization section", "type": "text", "value": "MONETIZATION"},
+        {"name": "Has competitor analysis", "type": "text", "value": "COMPETITOR"},
+        {"name": "Has advanced insights", "type": "text", "value": "ADVANCED INSIGHTS"},
+        {"name": "Has priority fixes", "type": "text", "value": "PRIORITY FIXES"},
+        {"name": "Has 90-day roadmap", "type": "text", "value": "90-DAY"},
+        {"name": "Analyzes first 30 seconds", "type": "all_text", "value": ["first", "30", "second"]},
+        {"name": "Addresses 3.2% CTR", "type": "text", "value": "3.2%"},
+        {"name": "Addresses 25% retention", "type": "text", "value": "25%"},
+        {"name": "Suggests better thumbnail", "type": "regex", "value": "(better thumbnail|thumbnail ideas|thumbnail suggestion)"},
+        {"name": "Suggests better titles", "type": "regex", "value": "(better title|title variation|title suggestion|alternative title)"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "growth-stagnation",
+      "prompt": "I've got a small gaming channel (about 2k subs) and I post 3 times a week but views have flatlined at like 200 per video. I make Minecraft content if that matters. One video randomly got 50k views 2 months ago and nothing since. What happened? Was that just luck? How do I get YouTube to recommend my stuff again?",
+      "expected_output": "Analysis of channel stagnation, algorithm recommendation diagnosis, niche saturation assessment, content differentiation advice, and specific growth strategy for a small gaming channel",
+      "files": [],
+      "assertions": [
+        {"name": "Has section-wise scores", "type": "text", "value": "SECTION-WISE SCORES"},
+        {"name": "Has strengths", "type": "text", "value": "STRENGTHS"},
+        {"name": "Has weaknesses", "type": "text", "value": "WEAKNESSES"},
+        {"name": "Has overall rating", "type": "regex", "value": "OVERALL RATING.*\\d+/\\d+"},
+        {"name": "Has growth plan", "type": "text", "value": "GROWTH PLAN"},
+        {"name": "Has algorithm analysis", "type": "text", "value": "ALGORITHM ANALYSIS"},
+        {"name": "Has thumbnail/title analysis", "type": "text", "value": "THUMBNAIL"},
+        {"name": "Has retention analysis", "type": "text", "value": "RETENTION ANALYSIS"},
+        {"name": "Has competitor analysis", "type": "text", "value": "COMPETITOR"},
+        {"name": "Has advanced insights", "type": "text", "value": "ADVANCED INSIGHTS"},
+        {"name": "Has priority fixes", "type": "text", "value": "PRIORITY FIXES"},
+        {"name": "Has 90-day roadmap", "type": "text", "value": "90-DAY"},
+        {"name": "Addresses 50k outlier video", "type": "all_text", "value": ["50k", "outlier"]},
+        {"name": "Minecraft-specific advice", "type": "text", "value": "Minecraft"},
+        {"name": "Algorithm recommendation advice", "type": "text", "value": "recommend"},
+        {"name": "Gaming channel specific tips", "type": "text", "value": "gaming"},
+        {"name": "Has upload frequency advice", "type": "text", "value": "3x"}
+      ]
+    }
+  ]
+}
