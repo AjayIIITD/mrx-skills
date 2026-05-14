@@ -6,8 +6,9 @@ export async function publishReel(videoUrl, caption, hashtags) {
   const userId = process.env.INSTAGRAM_USER_ID;
   const token = process.env.INSTAGRAM_ACCESS_TOKEN;
 
-  if (!userId || !token) {
-    console.warn("⚠ Instagram API not configured — skipping publish");
+  if (!userId || !token || !videoUrl) {
+    const reason = !userId || !token ? "API not configured" : "no video URL";
+    console.warn(`⚠ Instagram publish skipped — ${reason}`);
     return { simulated: true, caption, hashtags };
   }
 
@@ -46,9 +47,10 @@ export async function publishCarousel(images, caption, hashtags) {
   const userId = process.env.INSTAGRAM_USER_ID;
   const token = process.env.INSTAGRAM_ACCESS_TOKEN;
 
-  if (!userId || !token) {
-    console.warn("⚠ Instagram API not configured — skipping publish");
-    return { simulated: true, images: images.length, caption, hashtags };
+  if (!userId || !token || !images?.length) {
+    const reason = !userId || !token ? "API not configured" : "no images";
+    console.warn(`⚠ Instagram publish skipped — ${reason}`);
+    return { simulated: true, images: images?.length || 0, caption, hashtags };
   }
 
   // Create containers for each image
@@ -96,8 +98,9 @@ export async function publishPhoto(imageUrl, caption, hashtags) {
   const userId = process.env.INSTAGRAM_USER_ID;
   const token = process.env.INSTAGRAM_ACCESS_TOKEN;
 
-  if (!userId || !token) {
-    console.warn("⚠ Instagram API not configured — skipping publish");
+  if (!userId || !token || !imageUrl) {
+    const reason = !userId || !token ? "API not configured" : "no image URL";
+    console.warn(`⚠ Instagram publish skipped — ${reason}`);
     return { simulated: true, imageUrl, caption, hashtags };
   }
 
