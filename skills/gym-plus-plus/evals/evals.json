@@ -1,0 +1,23 @@
+{
+  "skill_name": "gym-plus-plus",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "i'm a 28yo software engineer, male, 195lbs. i sit 10-12 hours a day coding and i feel like garbage honestly. my main goals are losing this belly fat, fixing my energy (i crash hard every afternoon), clearing up my skin (acne along my jaw/cheeks), and getting rid of this lower back pain i've had for months. i sleep at 2am most nights, drink sugary coffee 3x a day just to function, and my diet is mostly takeout because i'm deep in a coding session and just grab whatever. low protein for sure. tight hips too from sitting all day. i don't exercise at all right now. stress is high. i can do about 45 mins a day and have a moderate budget. what's my first move?",
+      "expected_output": "A full root cause analysis and integrated plan addressing belly fat, low energy, acne, back pain, poor sleep, and chaotic diet for a sedentary software engineer",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "34f, been lifting consistently for 5 years on an upper/lower 4x a week split. my main lifts have been stalled for 8 months — i can't break through. i'm always sore, i wake up tired even though i get 6 hours of sleep, and i have this dry skin patch near my nose/chin that won't go away. i eat high protein but my meal timing is all over the place. i take pre-workout daily and drink a lot of caffeine. cardio is minimal. i also get cravings at night and have a high stress job. goals are breaking the plateau, improving recovery, better skin quality, and reducing fatigue. what am i missing?",
+      "expected_output": "A plateau-busting plan addressing overtraining potential, recovery deficits, sleep quality, skin nutrition, and training periodization for an experienced female lifter",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "22m college student, heavy screen time all day. i have forward head posture, tension headaches, and i crash after every meal. my hair has been thinning which freaks me out, my sleep schedule is garbage, and i get bad anxiety during exams. i eat mostly hostel food (pasta, sandwiches, whatever's available), barely drink water, and get very little sunlight. i do random workouts inconsistently but no real plan. my step count is very low. goals are fixing my posture, getting stable energy, improving hair health, reducing headaches, and building a lean physique without a gym. can i actually fix this or am i stuck like this?",
+      "expected_output": "A corrective plan addressing posture, energy stability, hair health, sleep optimization, nutrition within limited food options, and bodyweight training for a college student",
+      "files": []
+    }
+  ]
+}
