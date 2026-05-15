@@ -10,11 +10,17 @@ Deep YouTube channel audit & growth strategy — analyzes channels, videos, thum
 ### gym-plus-plus
 Systems-level health and human performance coach — root-cause analysis, integrated training/nutrition/recovery/skin/lifestyle optimization, phased implementation, and adherence-focused planning for users with multiple interconnected health and fitness goals.
 
+### academic-operating-system
+Academic Operating System — integrated academic strategy coach focused on root-cause analysis, sustainable performance, execution systems, learning science, and long-term self-management for students struggling with consistency, procrastination, backlog, and academic overwhelm.
+
 ### skill-creator
 Create new skills, modify and improve existing skills, and measure skill performance.
 
 ### instagram-account-audit
 Instagram account audit & growth score — analyzes Instagram profiles across key growth factors like profile optimization, content quality, reels strategy, engagement quality, consistency, branding, and monetization readiness.
+
+### instagram-growth-operator
+Autonomous Instagram growth and account management — plans content strategy, writes captions, researches hashtags, analyzes competitors, tracks trends, and optimizes engagement.
 
 ## Installation
 

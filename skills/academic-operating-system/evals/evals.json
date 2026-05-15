@@ -1,0 +1,260 @@
+{
+  "skill_name": "academic-operating-system",
+  "evals": [
+    {
+      "id": 1,
+      "name": "backlog-recovery-fresher",
+      "prompt": "bhai help kardo. mai BTech CSE first year hu, mid-sem exams 3 weeks mein hai. mene kuch nahi padha. backlog hai 4 subjects mein \u2014 maths, programming, digital logic, english. roz sochta hu kal se padhunga but phone lagta hai 6-7 ghante roz. sleep schedule bhi kharab hai \u2014 3am ko sota hu, 12pm tak uthta hu. kya karu? pls koi system batao.",
+      "expected_output": "Assessment plan with backlog recovery strategy, daily schedule, priority subjects, and habit system for the student",
+      "files": [],
+      "assertions": [
+        {
+          "name": "includes-assessment",
+          "text": "Response includes an assessment/profile section summarizing user's situation",
+          "expected": true
+        },
+        {
+          "name": "includes-root-cause",
+          "text": "Response includes root cause analysis of procrastination/schedule issues",
+          "expected": true
+        },
+        {
+          "name": "includes-priority-fixes",
+          "text": "Response identifies highest-leverage fixes for the student",
+          "expected": true
+        },
+        {
+          "name": "includes-daily-plan",
+          "text": "Response provides a concrete daily/weekly plan or schedule",
+          "expected": true
+        },
+        {
+          "name": "includes-phone-solution",
+          "text": "Response addresses phone addiction with specific strategies",
+          "expected": true
+        },
+        {
+          "name": "includes-sleep-fix",
+          "text": "Response addresses sleep schedule normalization",
+          "expected": true
+        },
+        {
+          "name": "realistic-intensity",
+          "text": "Response recommends sustainable study hours (not 10-12hr days)",
+          "expected": true
+        },
+        {
+          "name": "no-fake-motivation",
+          "text": "Response avoids toxic motivation, guilt, or shame-based language",
+          "expected": true
+        },
+        {
+          "name": "structured-format",
+          "text": "Response uses clear structured formatting (sections, tables, or lists)",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "procrastination-and-consistency",
+      "prompt": "i always make plans but never follow them for more than 2-3 days. i've tried todo lists, notion, google calendar, everything. after a few days i just stop and feel guilty. then i make a new plan and the cycle repeats. im in my 3rd semester rn and my cgpa dropped from 8.5 to 6.2. i know i can study but i just don't execute. what's wrong with me and how do i actually fix this.",
+      "expected_output": "Root cause analysis of the procrastination cycle, execution-focused system design, and behavior change strategy",
+      "files": [],
+      "assertions": [
+        {
+          "name": "includes-assessment",
+          "text": "Response includes assessment of user's situation",
+          "expected": true
+        },
+        {
+          "name": "includes-root-cause",
+          "text": "Response analyzes root cause of the plan-abandon cycle",
+          "expected": true
+        },
+        {
+          "name": "includes-execution-fix",
+          "text": "Response addresses the planning-execution gap specifically",
+          "expected": true
+        },
+        {
+          "name": "includes-very-small-start",
+          "text": "Response recommends starting with very small commitments (minutes, not hours)",
+          "expected": true
+        },
+        {
+          "name": "includes-failure-recovery",
+          "text": "Response includes what to do when missing a day/resetting after failure",
+          "expected": true
+        },
+        {
+          "name": "addresses-guilt",
+          "text": "Response addresses guilt spirals and the psychological pattern",
+          "expected": true
+        },
+        {
+          "name": "includes-habit-system",
+          "text": "Response includes habit-building mechanism (triggers/stacks/rules)",
+          "expected": true
+        },
+        {
+          "name": "no-fake-motivation",
+          "text": "Response avoids toxic motivation and shame-based language",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "exam-prep-strategy",
+      "prompt": "ok so i have 4 weeks until my end-sem exams. 5 subjects \u2014 3 theory (os, dbms, cn) and 2 math (probability, linear algebra). i haven't started properly but i have watched some lectures. my attention span is maybe 20-30 mins max. i get distracted easily. i can study 4-5 hours a day if i push myself but not consistently. give me a day-by-day plan that actually works for someone like me.",
+      "expected_output": "Exam preparation strategy with spaced revision cycles, subject prioritization, focus techniques, and a realistic daily plan",
+      "files": [],
+      "assertions": [
+        {
+          "name": "includes-assessment",
+          "text": "Response includes assessment of user's situation and time available",
+          "expected": true
+        },
+        {
+          "name": "day-by-day-plan",
+          "text": "Response provides a concrete day-by-day or week-by-week plan",
+          "expected": true
+        },
+        {
+          "name": "addresses-attention-span",
+          "text": "Response addresses short attention span with specific techniques (pomodoro, etc)",
+          "expected": true
+        },
+        {
+          "name": "subject-prioritization",
+          "text": "Response prioritizes subjects or differentiates theory vs math approach",
+          "expected": true
+        },
+        {
+          "name": "includes-active-recall",
+          "text": "Response recommends active recall or retrieval practice",
+          "expected": true
+        },
+        {
+          "name": "includes-revision-plan",
+          "text": "Response includes a revision strategy for the final week",
+          "expected": true
+        },
+        {
+          "name": "realistic-hours",
+          "text": "Response recommends realistic study hours based on user's stated capacity",
+          "expected": true
+        },
+        {
+          "name": "includes-focus-system",
+          "text": "Response includes focus/distraction management strategies",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "semester-planning-system",
+      "prompt": "next semester start ho raha hai aur mai iss baar genuinely consistent rehna chahta hu. pichle 2 semesters me same story rahi \u2014 first 2 weeks full motivation, then gradual decline, then last minute rush before exams. mai abhi se system banana chahta hu jo poore semester chal sake. what should i do? i have 6 subjects, some are heavy on theory, some are practical/coding subjects. help me build a system that survives the semester.",
+      "expected_output": "Full semester system design with weekly/daily structure, habit stacking, review cycles, and sustainability mechanisms",
+      "files": [],
+      "assertions": [
+        {
+          "name": "includes-assessment",
+          "text": "Response includes assessment of user's past pattern",
+          "expected": true
+        },
+        {
+          "name": "includes-root-cause",
+          "text": "Response analyzes root cause of 2-week motivation crash",
+          "expected": true
+        },
+        {
+          "name": "full-semester-system",
+          "text": "Response provides a system designed for entire semester, not just exam prep",
+          "expected": true
+        },
+        {
+          "name": "weekly-template",
+          "text": "Response includes a weekly schedule template or rhythm",
+          "expected": true
+        },
+        {
+          "name": "theory-vs-practical",
+          "text": "Response differentiates approach for theory vs coding/practical subjects",
+          "expected": true
+        },
+        {
+          "name": "sustainability-mechanism",
+          "text": "Response includes sustainability mechanisms (review cycles, buffer days)",
+          "expected": true
+        },
+        {
+          "name": "minimal-viable",
+          "text": "Response recommends a minimum viable schedule, not a perfect 12hr day",
+          "expected": true
+        },
+        {
+          "name": "includes-review-system",
+          "text": "Response includes a weekly review/reflection system",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "burnout-recovery-restart",
+      "prompt": "i completely burned out last semester. was studying 10-12 hours daily before exams, got sick, performed badly anyway. now its been 2 months of break and i cant bring myself to open any book. i feel anxious just thinking about studying. i need to start again but idk how. im in my 2nd year BTech. please help me restart without making things worse.",
+      "expected_output": "Burnout recovery plan with gradual restart strategy, anxiety management, minimal initial load, and momentum building",
+      "files": [],
+      "assertions": [
+        {
+          "name": "includes-assessment",
+          "text": "Response includes assessment of burnout situation",
+          "expected": true
+        },
+        {
+          "name": "includes-root-cause",
+          "text": "Response analyzes root cause of the burnout",
+          "expected": true
+        },
+        {
+          "name": "gradual-restart",
+          "text": "Response recommends a gradual restart (not jumping back to full intensity)",
+          "expected": true
+        },
+        {
+          "name": "micro-start",
+          "text": "Response suggests starting with very small sessions (5-10 min)",
+          "expected": true
+        },
+        {
+          "name": "addresses-anxiety",
+          "text": "Response addresses study-related anxiety and avoidance",
+          "expected": true
+        },
+        {
+          "name": "phased-approach",
+          "text": "Response uses a phased/step-by-step recovery approach",
+          "expected": true
+        },
+        {
+          "name": "no-overwork",
+          "text": "Response explicitly warns against repeating the overwork pattern",
+          "expected": true
+        },
+        {
+          "name": "includes-rest-days",
+          "text": "Response includes rest/recovery days in the plan",
+          "expected": true
+        },
+        {
+          "name": "no-shame",
+          "text": "Response avoids shaming and normalizes the experience",
+          "expected": true
+        }
+      ]
+    }
+  ]
+}
