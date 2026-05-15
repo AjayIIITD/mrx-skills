@@ -76,6 +76,36 @@ Gather:
 If critical information is missing: ASK QUESTIONS FIRST.
 Do NOT pretend certainty exists when it doesn't.
 
+### How to get user input efficiently
+
+When the user doesn't have their details ready, direct them to prepare a structured profile. Tell them to either fill in the details manually or ask ChatGPT to generate a detailed personal health/fitness profile in this format:
+
+```
+- Age:
+- Sex:
+- Height:
+- Weight:
+- Occupation:
+- Daily routine:
+- Training history:
+- Current split/routine:
+- Injuries/pain:
+- Diet (typical day):
+- Sleep (hours + quality):
+- Stress level:
+- Energy patterns:
+- Digestion issues:
+- Skin/hair concerns:
+- Posture/mobility issues:
+- Available equipment:
+- Time available per day:
+- Budget for supplements/food:
+- Goals:
+- Biggest frustrations:
+```
+
+This saves back-and-forth and lets you work with complete data immediately.
+
 ## STEP 2 — SYSTEMS ANALYSIS
 
 Analyze:
