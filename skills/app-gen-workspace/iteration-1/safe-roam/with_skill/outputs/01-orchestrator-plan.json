@@ -1,0 +1,69 @@
+{
+  "app_name": "SafeRoam",
+  "description": "Women safety web app for Delhi — provides SOS alerts with live location sharing to emergency contacts, real-time route tracking with safe zone geofencing alerts, and a personal safety dashboard with stats.",
+  "platform": "web",
+  "target_audience": "Women in Delhi/NCR",
+  "problem": "Women face safety concerns while traveling alone in Delhi. Existing solutions lack real-time location sharing with trusted contacts and proactive safe zone alerts specific to Delhi's high-risk areas.",
+  "tech_stack": {
+    "frontend": "React",
+    "backend": "Node.js/Express",
+    "database": "PostgreSQL"
+  },
+  "features": [
+    {
+      "id": "f1",
+      "name": "User Authentication & Emergency Contacts",
+      "agent": "architect,backend,database",
+      "description": "Registration, login, profile management, and management of emergency contacts (name, phone, email, relationship)"
+    },
+    {
+      "id": "f2",
+      "name": "SOS Alert with Live Location",
+      "agent": "architect,backend,database,ui",
+      "description": "One-tap SOS button that sends SMS/email to emergency contacts with the user's real-time Google Maps link. Includes a cooldown to prevent spam."
+    },
+    {
+      "id": "f3",
+      "name": "Route Tracking & Safe Zone Alerts",
+      "agent": "architect,backend,database,ui",
+      "description": "User shares a trip route (start/end). Backend checks against predefined safe/unsafe zones in Delhi. Alerts if user deviates or enters a high-risk area."
+    },
+    {
+      "id": "f4",
+      "name": "Safety Dashboard",
+      "agent": "ui,backend,database",
+      "description": "Dashboard showing SOS history, trip logs, safe zone stats, and safety score/trends over time"
+    }
+  ],
+  "agent_tasks": {
+    "architect": [
+      "Define system architecture pattern",
+      "Finalize tech stack decisions",
+      "Design high-level component breakdown",
+      "Define API contracts for all features",
+      "Document data flow (auth, SOS, tracking, dashboard)",
+      "Security considerations"
+    ],
+    "ui": [
+      "Design page inventory with routes",
+      "Define navigation flow (sidebar/navbar)",
+      "Create UI tokens (colors, typography, spacing)",
+      "Wireframe descriptions for key screens",
+      "List reusable components"
+    ],
+    "backend": [
+      "Define all API routes with methods, paths, auth",
+      "Design service layer (AuthService, SOSService, TrackingService, DashboardService)",
+      "Middleware plan (auth, validation, rate limiting)",
+      "File structure for Express backend",
+      "Error handling format"
+    ],
+    "database": [
+      "Design all tables with fields and types",
+      "Define relationships and foreign keys",
+      "Indexes for query performance",
+      "Enums for status fields",
+      "Seed data suggestions"
+    ]
+  }
+}

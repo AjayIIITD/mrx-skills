@@ -1,0 +1,272 @@
+{
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "auth": false,
+      "description": "Register a new user account",
+      "controller": "authController.register",
+      "validation": {"name": "required string min:2 max:100", "email": "required email unique", "password": "required string min:6", "phone": "optional string"}
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "auth": false,
+      "description": "Login and receive JWT token",
+      "controller": "authController.login",
+      "validation": {"email": "required email", "password": "required string"}
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "auth": true,
+      "description": "Get current authenticated user profile",
+      "controller": "authController.getMe"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/profile",
+      "auth": true,
+      "description": "Update user profile (name, phone)",
+      "controller": "authController.updateProfile",
+      "validation": {"name": "optional string", "phone": "optional string"}
+    },
+    {
+      "method": "GET",
+      "path": "/api/contacts",
+      "auth": true,
+      "description": "List all emergency contacts for the user",
+      "controller": "contactController.list"
+    },
+    {
+      "method": "POST",
+      "path": "/api/contacts",
+      "auth": true,
+      "description": "Add a new emergency contact",
+      "controller": "contactController.create",
+      "validation": {"name": "required string", "phone": "required string", "email": "optional email", "relationship": "optional string"}
+    },
+    {
+      "method": "PUT",
+      "path": "/api/contacts/:id",
+      "auth": true,
+      "description": "Update an emergency contact",
+      "controller": "contactController.update",
+      "validation": {"name": "optional string", "phone": "optional string", "email": "optional email", "relationship": "optional string"}
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/contacts/:id",
+      "auth": true,
+      "description": "Delete an emergency contact",
+      "controller": "contactController.remove"
+    },
+    {
+      "method": "POST",
+      "path": "/api/sos/trigger",
+      "auth": true,
+      "description": "Trigger SOS alert — notifies all emergency contacts with live location",
+      "controller": "sosController.trigger",
+      "validation": {"latitude": "required number", "longitude": "required number", "message": "optional string max:500"},
+      "rate_limit": "10 requests per minute per user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/sos/history",
+      "auth": true,
+      "description": "Get SOS alert history for the user",
+      "controller": "sosController.history",
+      "query": {"page": "optional number default:1", "limit": "optional number default:20"}
+    },
+    {
+      "method": "POST",
+      "path": "/api/tracks/start",
+      "auth": true,
+      "description": "Start a new tracked trip",
+      "controller": "trackController.start",
+      "validation": {"start_lat": "required number", "start_lng": "required number", "end_lat": "required number", "end_lng": "required number", "destination_name": "optional string max:200"}
+    },
+    {
+      "method": "POST",
+      "path": "/api/tracks/update",
+      "auth": true,
+      "description": "Update current location on an active trip. Returns safe zone status and any alerts.",
+      "controller": "trackController.updateLocation",
+      "validation": {"track_id": "required string uuid", "latitude": "required number", "longitude": "required number"}
+    },
+    {
+      "method": "POST",
+      "path": "/api/tracks/:id/end",
+      "auth": true,
+      "description": "End an active tracked trip",
+      "controller": "trackController.end"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tracks/history",
+      "auth": true,
+      "description": "Get trip history for the user",
+      "controller": "trackController.history",
+      "query": {"page": "optional number default:1", "limit": "optional number default:20"}
+    },
+    {
+      "method": "GET",
+      "path": "/api/tracks/active",
+      "auth": true,
+      "description": "Get current active trip (if any)",
+      "controller": "trackController.getActive"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tracks/alerts",
+      "auth": true,
+      "description": "Get unresolved alerts for the user's active trip",
+      "controller": "trackController.getAlerts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/tracks/alerts/:id/acknowledge",
+      "auth": true,
+      "description": "Acknowledge a safe zone alert (user pressed 'I'm Safe')",
+      "controller": "trackController.acknowledgeAlert"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/stats",
+      "auth": true,
+      "description": "Get aggregated safety dashboard statistics",
+      "controller": "dashboardController.getStats"
+    },
+    {
+      "method": "GET",
+      "path": "/api/zones",
+      "auth": true,
+      "description": "Get all safe/unsafe zone definitions for Delhi",
+      "controller": "zoneController.list"
+    }
+  ],
+  "services": [
+    {
+      "name": "AuthService",
+      "methods": ["register", "login", "verifyToken", "getProfile", "updateProfile"],
+      "dependencies": ["prisma", "bcryptjs", "jsonwebtoken"],
+      "description": "Handles user registration, password hashing, JWT generation and verification"
+    },
+    {
+      "name": "ContactService",
+      "methods": ["list", "create", "update", "remove"],
+      "dependencies": ["prisma"],
+      "description": "CRUD operations on emergency contacts scoped to the authenticated user"
+    },
+    {
+      "name": "SOSService",
+      "methods": ["trigger", "getHistory", "notifyContacts"],
+      "dependencies": ["prisma", "twilio", "nodemailer"],
+      "description": "Triggers SOS alerts, dispatches SMS/email to emergency contacts, logs alert records"
+    },
+    {
+      "name": "TrackingService",
+      "methods": ["startTrip", "updateLocation", "endTrip", "getActiveTrip", "getHistory", "evaluateZone", "getAlerts", "acknowledgeAlert"],
+      "dependencies": ["prisma", "@turf/turf"],
+      "description": "Manages trip lifecycle, evaluates current location against safe zone polygons, generates zone alerts"
+    },
+    {
+      "name": "DashboardService",
+      "methods": ["getStats", "getRecentActivity"],
+      "dependencies": ["prisma"],
+      "description": "Aggregates user data into safety stats: total trips, SOS count, zone alerts, safety score"
+    },
+    {
+      "name": "ZoneService",
+      "methods": ["listAll", "getZonesByType", "seedDefaultZones"],
+      "dependencies": ["prisma"],
+      "description": "Manages predefined safe/unsafe zone polygons for Delhi. Zone data seeded from a JSON file."
+    },
+    {
+      "name": "NotificationService",
+      "methods": ["sendSMS", "sendEmail"],
+      "dependencies": ["twilio", "nodemailer"],
+      "description": "Abstraction over SMS/email delivery. Used by SOSService and TrackingService."
+    }
+  ],
+  "middleware": [
+    {"name": "auth", "description": "Verifies JWT from Authorization header, attaches user to req.user", "applies_to": ["/api/*"], "exclude": ["/api/auth/login", "/api/auth/register"]},
+    {"name": "validate", "description": "Express-validator based request validation. Checks body, params, query.", "applies_to": ["/api/*"]},
+    {"name": "rateLimiter", "description": "Rate limiting per IP. General: 100 req/min. SOS route: 10 req/min.", "applies_to": ["/api/*"]},
+    {"name": "errorHandler", "description": "Global error handler at app level. Returns consistent JSON error responses.", "applies_to": ["global"]},
+    {"name": "cors", "description": "CORS whitelist for frontend origin only.", "applies_to": ["global"]},
+    {"name": "helmet", "description": "Standard security headers.", "applies_to": ["global"]}
+  ],
+  "structure": {
+    "backend/": {
+      "server.js": "Entry point — Express app setup, middleware registration, route mounting, error handler",
+      "package.json": "Dependencies and scripts",
+      ".env.example": "Environment variables template",
+      "prisma/": {
+        "schema.prisma": "Database schema definition",
+        "seed.js": "Seed script with default Delhi safe zones"
+      },
+      "src/": {
+        "routes/": {
+          "auth.routes.js": "Auth route definitions",
+          "contact.routes.js": "Contact route definitions",
+          "sos.routes.js": "SOS route definitions",
+          "track.routes.js": "Tracking route definitions",
+          "dashboard.routes.js": "Dashboard route definitions",
+          "zone.routes.js": "Zone route definitions"
+        },
+        "controllers/": {
+          "authController.js": "Request handlers for auth endpoints",
+          "contactController.js": "Request handlers for contact endpoints",
+          "sosController.js": "Request handlers for SOS endpoints",
+          "trackController.js": "Request handlers for tracking endpoints",
+          "dashboardController.js": "Request handlers for dashboard endpoints",
+          "zoneController.js": "Request handlers for zone endpoints"
+        },
+        "services/": {
+          "authService.js": "Auth business logic",
+          "contactService.js": "Contact business logic",
+          "sosService.js": "SOS/dispatch business logic",
+          "trackingService.js": "Trip tracking + zone evaluation",
+          "dashboardService.js": "Dashboard aggregation",
+          "zoneService.js": "Zone management",
+          "notificationService.js": "SMS/Email dispatch"
+        },
+        "middleware/": {
+          "auth.js": "JWT verification middleware",
+          "validate.js": "Request validation middleware",
+          "rateLimiter.js": "Rate limiting setup",
+          "errorHandler.js": "Global error handler"
+        },
+        "utils/": {
+          "jwt.js": "JWT sign/verify helpers",
+          "geofence.js": "Point-in-polygon and geo computation helpers",
+          "logger.js": "Simple console logger with timestamp",
+          "constants.js": "App-wide constants (Delhi center coords, default radius, etc.)"
+        },
+        "config/": {
+          "index.js": "Reads .env and exports config object",
+          "twilio.js": "Twilio client instance",
+          "mailer.js": "Nodemailer transport instance"
+        }
+      }
+    }
+  },
+  "error_format": {
+    "example": {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Email is required",
+        "details": [{"field": "email", "message": "Email is required"}]
+      }
+    },
+    "codes": {
+      "VALIDATION_ERROR": "Request body/params failed validation",
+      "UNAUTHORIZED": "Missing or invalid JWT token",
+      "NOT_FOUND": "Resource not found",
+      "RATE_LIMITED": "Too many requests",
+      "INTERNAL_ERROR": "Server error — check logs",
+      "SOS_COOLDOWN": "SOS triggered too recently — wait before retrying"
+    }
+  }
+}

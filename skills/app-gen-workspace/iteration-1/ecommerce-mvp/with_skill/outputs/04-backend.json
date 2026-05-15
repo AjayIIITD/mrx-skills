@@ -1,0 +1,185 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/products",
+      "auth": false,
+      "description": "List published products (paginated, search by name)",
+      "handler": "productController.list",
+      "validation": {"query": {"page": "optional number", "limit": "optional number", "search": "optional string"}}
+    },
+    {
+      "method": "GET",
+      "path": "/api/products/[id]",
+      "auth": false,
+      "description": "Get single product by ID",
+      "handler": "productController.getById"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "auth": false,
+      "description": "Register new user account",
+      "handler": "authController.register",
+      "validation": {"body": {"email": "required email", "password": "required min:8", "name": "required string"}}
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "auth": false,
+      "description": "Login with email/password, returns JWT/session",
+      "handler": "authController.login",
+      "validation": {"body": {"email": "required email", "password": "required string"}}
+    },
+    {
+      "method": "POST",
+      "path": "/api/checkout/create-session",
+      "auth": true,
+      "description": "Create Stripe Checkout Session, return session URL",
+      "handler": "checkoutController.createSession",
+      "validation": {"body": {"items": "required array of {productId, quantity}"}}
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/stripe",
+      "auth": false,
+      "description": "Stripe webhook: listen for checkout.session.completed",
+      "handler": "webhookController.stripe"
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "auth": true,
+      "description": "List current user's orders (newest first)",
+      "handler": "orderController.listByUser"
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/[id]",
+      "auth": true,
+      "description": "Get single order details (user must own order)",
+      "handler": "orderController.getById"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cart",
+      "auth": false,
+      "description": "Get cart (from session/storage — client-side React Context, no API needed for MVP)",
+      "handler": "client-side only"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/products",
+      "auth": true,
+      "role": "admin",
+      "description": "Create a new product",
+      "handler": "adminProductController.create",
+      "validation": {"body": {"name": "required string", "description": "required string", "price": "required number positive", "imageUrl": "required string url", "stock": "required number min:0"}}
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/products/[id]",
+      "auth": true,
+      "role": "admin",
+      "description": "Update existing product",
+      "handler": "adminProductController.update",
+      "validation": {"body": {"name": "optional string", "description": "optional string", "price": "optional number", "imageUrl": "optional string", "stock": "optional number"}}
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/products/[id]",
+      "auth": true,
+      "role": "admin",
+      "description": "Delete product (soft delete: set deletedAt)",
+      "handler": "adminProductController.remove"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products",
+      "auth": true,
+      "role": "admin",
+      "description": "List all products (including hidden/deleted, for management)",
+      "handler": "adminProductController.listAll"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/orders",
+      "auth": true,
+      "role": "admin",
+      "description": "List all orders with user info",
+      "handler": "adminOrderController.listAll"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/orders/[id]/status",
+      "auth": true,
+      "role": "admin",
+      "description": "Update order status (processing, shipped, delivered, cancelled)",
+      "handler": "adminOrderController.updateStatus",
+      "validation": {"body": {"status": "required enum: processing|shipped|delivered|cancelled"}}
+    }
+  ],
+  "services": [
+    {"name": "AuthService", "methods": ["register", "login", "getCurrentUser"], "dependencies": ["Prisma", "bcrypt", "next-auth"]},
+    {"name": "ProductService", "methods": ["list", "getById", "create", "update", "remove", "listAll"], "dependencies": ["Prisma"]},
+    {"name": "CartService", "methods": ["addItem", "removeItem", "updateQuantity", "getContents"], "dependencies": ["Prisma (for persisted cart) or client-side context"]},
+    {"name": "CheckoutService", "methods": ["createStripeSession", "handleStripeWebhook"], "dependencies": ["Stripe SDK", "Prisma"]},
+    {"name": "OrderService", "methods": ["createFromSession", "listByUser", "getById", "listAll", "updateStatus"], "dependencies": ["Prisma"]}
+  ],
+  "middleware": [
+    {"name": "authGuard", "applies_to": ["/api/orders/*", "/api/checkout/*"], "exclude": [], "behavior": "Return 401 if no valid session"},
+    {"name": "adminGuard", "applies_to": ["/api/admin/*"], "exclude": [], "behavior": "Return 403 if user.role !== 'admin'"},
+    {"name": "errorHandler", "applies_to": ["/api/*"], "behavior": "Catch all errors, return { error: { code, message } }"},
+    {"name": "validationMiddleware", "applies_to": ["/api/*"], "behavior": "Validate request body/query with Zod schemas before handler"}
+  ],
+  "error_response_format": {
+    "error": {"code": "VALIDATION_ERROR", "message": "Email is required", "details": [{"field": "email", "message": "Email is required"}]}
+  },
+  "structure": {
+    "src/": {
+      "app/": {
+        "(public)/": {"page.tsx": "Home / products grid", "layout.tsx": "Public layout with navbar"},
+        "(auth)/": {"login/page.tsx": "Login page", "register/page.tsx": "Register page"},
+        "(admin)/": {"admin/page.tsx": "Admin dashboard", "admin/products/page.tsx": "Product management", "admin/products/new/page.tsx": "New product", "admin/products/[id]/edit/page.tsx": "Edit product", "admin/orders/page.tsx": "Order management", "admin/layout.tsx": "Admin layout with sidebar"},
+        "products/[id]/page.tsx": "Product detail page",
+        "cart/page.tsx": "Cart page",
+        "checkout/page.tsx": "Checkout page",
+        "checkout/success/page.tsx": "Order success",
+        "orders/page.tsx": "User orders",
+        "orders/[id]/page.tsx": "Order detail",
+        "api/": {
+          "products/route.ts": "GET products",
+          "products/[id]/route.ts": "GET product by id",
+          "auth/[...nextauth]/route.ts": "NextAuth handler",
+          "checkout/create-session/route.ts": "POST create Stripe session",
+          "webhooks/stripe/route.ts": "POST Stripe webhook",
+          "orders/route.ts": "GET user orders",
+          "orders/[id]/route.ts": "GET order detail",
+          "admin/products/route.ts": "GET/POST admin products",
+          "admin/products/[id]/route.ts": "PUT/DELETE admin products",
+          "admin/orders/route.ts": "GET admin orders",
+          "admin/orders/[id]/status/route.ts": "PUT order status"
+        }
+      },
+      "components/": {
+        "ui/": "Button, Input, Modal, Badge, Table",
+        "product/": "ProductCard, ProductGrid",
+        "cart/": "CartItemRow, CartSummary",
+        "admin/": "AdminSidebar, ProductForm"
+      },
+      "lib/": {
+        "prisma.ts": "Prisma client singleton",
+        "stripe.ts": "Stripe client init",
+        "auth.ts": "NextAuth config"
+      },
+      "services/": "auth.service.ts, product.service.ts, checkout.service.ts, order.service.ts",
+      "schemas/": "Zod validation schemas",
+      "types/": "TypeScript type definitions"
+    }
+  },
+  "auth_flow": {
+    "register": "User submits name + email + password → hash password with bcrypt → create user in DB → auto-login via NextAuth signIn",
+    "login": "User submits email + password → verify bcrypt hash → create NextAuth session/JWT",
+    "session": "NextAuth JWT strategy — user object available via useSession() in components and getServerSession() in API routes"
+  }
+}

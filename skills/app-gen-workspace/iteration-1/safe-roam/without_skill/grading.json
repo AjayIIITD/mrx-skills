@@ -1,0 +1,45 @@
+{
+  "eval_name": "safe-roam",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "Output includes a merged/unified plan file",
+      "passed": false,
+      "evidence": "No files matching *merged*plan*"
+    },
+    {
+      "text": "Output includes a final codegen prompt file",
+      "passed": true,
+      "evidence": "Found 1 matching files: ['06-codegen-prompt.md']"
+    },
+    {
+      "text": "Output specifies tech stack (React + Node.js)",
+      "passed": true,
+      "evidence": "Found 3/3 terms. Found: ['React', 'Node', 'Express']"
+    },
+    {
+      "text": "Output includes database/table/collection definitions",
+      "passed": true,
+      "evidence": "Found 4/4 terms. Found: ['collection', 'table', 'schema', 'field']"
+    },
+    {
+      "text": "Output lists API endpoints",
+      "passed": true,
+      "evidence": "Found 5/5 terms. Found: ['/api/', 'endpoint', 'route', 'GET', 'POST']"
+    },
+    {
+      "text": "Output describes UI pages/screens",
+      "passed": true,
+      "evidence": "Found 3/3 terms. Found: ['page', 'screen', 'route']"
+    },
+    {
+      "text": "Output includes an orchestrator/feature plan (with-skill only)",
+      "passed": false,
+      "evidence": "Skipped: orchestrator plan not expected for baseline"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "total": 7
+  }
+}

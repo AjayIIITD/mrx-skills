@@ -1,0 +1,45 @@
+{
+  "eval_name": "team-todo",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Output includes a merged/unified plan file",
+      "passed": true,
+      "evidence": "Found 1 matching files: ['step-04-merged-plan.md']"
+    },
+    {
+      "text": "Output includes a final codegen prompt file",
+      "passed": true,
+      "evidence": "Found 1 matching files: ['step-05-codegen-prompt.md']"
+    },
+    {
+      "text": "Output uses the user-specified tech stack (Django + SQLite)",
+      "passed": true,
+      "evidence": "Found 3/3 terms. Found: ['Django', 'SQLite', 'sqlite']"
+    },
+    {
+      "text": "Output includes WebSocket/real-time support",
+      "passed": true,
+      "evidence": "Found 5/6 terms. Found: ['WebSocket', 'socket', 'realtime', 'real-time', 'Channels']"
+    },
+    {
+      "text": "Output includes database schema definitions",
+      "passed": true,
+      "evidence": "Found 4/4 terms. Found: ['model', 'table', 'field', 'schema']"
+    },
+    {
+      "text": "Output lists API endpoints",
+      "passed": true,
+      "evidence": "Found 3/3 terms. Found: ['/api/', 'endpoint', 'route']"
+    },
+    {
+      "text": "Output includes an orchestrator/feature plan (with-skill only)",
+      "passed": true,
+      "evidence": "Found 1 matching files: ['step-02-orchestrator.json']"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "total": 7
+  }
+}

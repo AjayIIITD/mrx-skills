@@ -1,0 +1,45 @@
+{
+  "eval_name": "ecommerce-mvp",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Output includes a merged/unified plan file",
+      "passed": true,
+      "evidence": "Found 1 matching files: ['06-merged-plan.md']"
+    },
+    {
+      "text": "Output includes a final codegen prompt file",
+      "passed": true,
+      "evidence": "Found 1 matching files: ['07-codegen-prompt.md']"
+    },
+    {
+      "text": "Output uses the user-specified tech stack (Next.js + Prisma)",
+      "passed": true,
+      "evidence": "Found 4/4 terms. Found: ['Next.js', 'Prisma', 'NextAuth', 'Stripe']"
+    },
+    {
+      "text": "Output includes database schema definitions",
+      "passed": true,
+      "evidence": "Found 4/4 terms. Found: ['schema', 'model', 'table', 'Prisma']"
+    },
+    {
+      "text": "Output lists API endpoints",
+      "passed": true,
+      "evidence": "Found 3/3 terms. Found: ['/api/', 'endpoint', 'route']"
+    },
+    {
+      "text": "Output describes UI pages and components",
+      "passed": true,
+      "evidence": "Found 3/3 terms. Found: ['page', 'component', 'layout']"
+    },
+    {
+      "text": "Output includes an orchestrator/feature plan (with-skill only)",
+      "passed": true,
+      "evidence": "Found 1 matching files: ['01-orchestrator.json']"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "total": 7
+  }
+}

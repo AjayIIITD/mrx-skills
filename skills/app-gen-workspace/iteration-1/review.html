@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App-Gen Skill Review - Iteration 1</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d0d0d; color: #e0e0e0; }
+  
+  .tabs { display: flex; border-bottom: 1px solid #333; background: #1a1a1a; position: sticky; top: 0; z-index: 10; }
+  .tab { padding: 14px 28px; cursor: pointer; border: none; background: none; color: #888; font-size: 15px; font-weight: 500; transition: all 0.2s; }
+  .tab:hover { color: #fff; background: #222; }
+  .tab.active { color: #fff; border-bottom: 2px solid #3b82f6; background: #222; }
+  
+  .panel { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
+  .panel.active { display: block; }
+  
+  /* Outputs tab */
+  .eval-nav { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .eval-btn { padding: 10px 20px; border: 1px solid #333; border-radius: 8px; background: #1a1a1a; color: #ccc; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+  .eval-btn:hover { border-color: #3b82f6; color: #fff; }
+  .eval-btn.active { border-color: #3b82f6; background: #1e3a5f; color: #fff; }
+  
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .comparison { grid-template-columns: 1fr; } }
+  
+  .column { border: 1px solid #333; border-radius: 10px; overflow: hidden; }
+  .column-header { padding: 12px 16px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .column-header.with-skill { background: #0f3b2e; color: #5ddbab; }
+  .column-header.without-skill { background: #3b1f0f; color: #f09b7b; }
+  
+  .output-content { padding: 16px; max-height: 70vh; overflow-y: auto; }
+  .output-content pre { background: #111; padding: 12px; border-radius: 6px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+  .output-content h3 { color: #8ab4f8; margin: 16px 0 8px; font-size: 15px; }
+  .output-content h4 { color: #ccc; margin: 12px 0 6px; font-size: 13px; }
+  .output-content .file-link { display: block; padding: 6px 10px; background: #1a1a1a; border: 1px solid #333; border-radius: 4px; margin: 4px 0; color: #8ab4f8; text-decoration: none; font-size: 13px; }
+  .output-content .file-link:hover { background: #222; }
+  
+  .grades { margin-top: 12px; }
+  .grade-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+  .grade-pass { color: #34d399; }
+  .grade-fail { color: #f87171; }
+  
+  .feedback-box { margin-top: 16px; }
+  .feedback-box textarea { width: 100%; min-height: 80px; background: #111; border: 1px solid #333; border-radius: 6px; color: #e0e0e0; padding: 10px; font-size: 13px; resize: vertical; }
+  .feedback-box textarea:focus { outline: none; border-color: #3b82f6; }
+  
+  /* Benchmark tab */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 20px; }
+  .stat-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+  .stat-card .sub { font-size: 13px; color: #888; margin-top: 2px; }
+  .stat-card .delta-positive { color: #34d399; }
+  .stat-card .delta-neutral { color: #fbbf24; }
+  
+  table.bench-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  table.bench-table th, table.bench-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #222; font-size: 13px; }
+  table.bench-table th { background: #1a1a1a; color: #888; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+  table.bench-table tr:hover { background: #151515; }
+  
+  .notes { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 24px; }
+  .notes h3 { color: #8ab4f8; margin-bottom: 12px; }
+  .notes li { margin: 6px 0; padding-left: 8px; color: #bbb; font-size: 14px; line-height: 1.5; }
+  
+  .prompt-display { font-size: 14px; line-height: 1.5; color: #ccc; margin-bottom: 16px; padding: 12px; background: #111; border-radius: 6px; border-left: 3px solid #3b82f6; }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('outputs')">Outputs</div>
+  <div class="tab" onclick="switchTab('benchmark')">Benchmark</div>
+</div>
+
+<div id="panel-outputs" class="panel active">
+
+<div class="eval-nav" id="evalNav"></div>
+
+<div id="evalContent">
+  <div class="prompt-display" id="promptDisplay"></div>
+  <div class="comparison">
+    <div class="column">
+      <div class="column-header with-skill">With App-Gen Skill</div>
+      <div class="output-content" id="withSkillOutput"></div>
+    </div>
+    <div class="column">
+      <div class="column-header without-skill">Without Skill (Baseline)</div>
+      <div class="output-content" id="withoutSkillOutput"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="panel-benchmark" class="panel">
+
+<div class="stats-grid" id="statsGrid"></div>
+
+<h3 style="color:#8ab4f8; margin-bottom:12px;">Per-Eval Breakdown</h3>
+<table class="bench-table" id="benchTable">
+  <thead>
+    <tr><th>Eval</th><th>With Skill (Pass)</th><th>Without Skill (Pass)</th><th>With Skill (Tokens)</th><th>Without Skill (Tokens)</th><th>With Skill (Time)</th><th>Without Skill (Time)</th></tr>
+  </thead>
+  <tbody id="benchBody"></tbody>
+</table>
+
+<div class="notes" id="analystNotes"></div>
+
+</div>
+
+<script>
+const EVAL_DATA = [
+  {
+    "id": "safe-roam",
+    "prompt": "Mujhe ek women safety app banana hai for Delhi. Naam SafeRoam hai. Features chahiye: SOS alert with live location to emergency contacts, route tracking with safe zone alerts, and a dashboard showing safety stats. Web app chahiye, React + Node.js stack.",
+    "with_skill": {
+      "files": ["01-orchestrator-plan.json", "02-architect-output.json", "03-ui-output.json", "04-backend-output.json", "05-database-output.json", "06-merged-plan.md", "07-final-codegen-prompt.md"],
+      "grades": [{"text":"Merged plan file","passed":true,"evidence":"06-merged-plan.md"},{"text":"Codegen prompt file","passed":true,"evidence":"07-final-codegen-prompt.md"},{"text":"Tech stack (React+Node)","passed":true,"evidence":"React, Node, Express"},{"text":"Database schema","passed":true,"evidence":"table, schema, field"},{"text":"API routes","passed":true,"evidence":"/api/, endpoint, route, GET, POST"},{"text":"UI pages","passed":true,"evidence":"page, screen, route"},{"text":"Orchestrator plan","passed":true,"evidence":"01-orchestrator-plan.json"}]
+    },
+    "without_skill": {
+      "files": ["01-architecture-plan.md", "02-ui-plan.md", "03-backend-plan.md", "04-database-plan.md", "05-project-structure.md", "06-codegen-prompt.md"],
+      "grades": [{"text":"Merged plan file","passed":false,"evidence":"Not found"},{"text":"Codegen prompt file","passed":true,"evidence":"06-codegen-prompt.md"},{"text":"Tech stack (React+Node)","passed":true,"evidence":"React, Node, Express"},{"text":"Database schema","passed":true,"evidence":"collection, table, schema, field"},{"text":"API routes","passed":true,"evidence":"/api/, endpoint, route, GET, POST"},{"text":"UI pages","passed":true,"evidence":"page, screen, route"},{"text":"Orchestrator plan","passed":false,"evidence":"Not expected for baseline"}]
+    }
+  },
+  {
+    "id": "ecommerce-mvp",
+    "prompt": "I want to build a simple e-commerce site. Just an MVP — products page, cart, checkout with Stripe, and an admin panel to manage products. Tech stack: Next.js + Prisma + PostgreSQL. Keep it simple, can be a monolith.",
+    "with_skill": {
+      "files": ["01-orchestrator.json", "02-architect.json", "03-ui.json", "04-backend.json", "05-database.json", "06-merged-plan.md", "07-codegen-prompt.md"],
+      "grades": [{"text":"Merged plan file","passed":true,"evidence":"06-merged-plan.md"},{"text":"Codegen prompt file","passed":true,"evidence":"07-codegen-prompt.md"},{"text":"Respects user stack","passed":true,"evidence":"Next.js, Prisma, NextAuth, Stripe"},{"text":"Database schema","passed":true,"evidence":"schema, model, table, Prisma"},{"text":"API routes","passed":true,"evidence":"/api/, endpoint, route"},{"text":"UI pages","passed":true,"evidence":"page, component, layout"},{"text":"Orchestrator plan","passed":true,"evidence":"01-orchestrator.json"}]
+    },
+    "without_skill": {
+      "files": ["architecture.md", "db-schema.prisma", "routes.md", "component-tree.md", "data-flow.md", "codegen-prompt.md"],
+      "grades": [{"text":"Merged plan file","passed":false,"evidence":"Not found"},{"text":"Codegen prompt file","passed":true,"evidence":"codegen-prompt.md"},{"text":"Respects user stack","passed":true,"evidence":"Next.js, Prisma, NextAuth, Stripe"},{"text":"Database schema","passed":true,"evidence":"schema, model, table, Prisma"},{"text":"API routes","passed":true,"evidence":"/api/, endpoint, route"},{"text":"UI pages","passed":true,"evidence":"page, component, layout"},{"text":"Orchestrator plan","passed":false,"evidence":"Not expected for baseline"}]
+    }
+  },
+  {
+    "id": "team-todo",
+    "prompt": "Ek team-based todo app banao. Features: workspaces, multiple projects per workspace, tasks with assignees and due dates, real-time updates via WebSockets. Mobile responsive web app. Backend mein Django use karna hai with SQLite for now.",
+    "with_skill": {
+      "files": ["step-01-understand.md", "step-02-orchestrator.json", "step-03a-architect.json", "step-03b-ui.json", "step-03c-backend.json", "step-03d-database.json", "step-04-merged-plan.md", "step-05-codegen-prompt.md"],
+      "grades": [{"text":"Merged plan file","passed":true,"evidence":"step-04-merged-plan.md"},{"text":"Codegen prompt file","passed":true,"evidence":"step-05-codegen-prompt.md"},{"text":"Respects user stack (Django+SQLite)","passed":true,"evidence":"Django, SQLite"},{"text":"WebSocket support","passed":true,"evidence":"WebSocket, socket, real-time, Channels"},{"text":"Database schema","passed":true,"evidence":"model, table, field, schema"},{"text":"API routes","passed":true,"evidence":"/api/, endpoint, route"},{"text":"Orchestrator plan","passed":true,"evidence":"step-02-orchestrator.json"}]
+    },
+    "without_skill": {
+      "files": ["architecture.md", "database-schema.md", "ui-ux.md", "api-design.md", "final-codegen-prompt.md"],
+      "grades": [{"text":"Merged plan file","passed":false,"evidence":"Not found"},{"text":"Codegen prompt file","passed":true,"evidence":"final-codegen-prompt.md"},{"text":"Respects user stack (Django+SQLite)","passed":true,"evidence":"Django, SQLite"},{"text":"WebSocket support","passed":true,"evidence":"WebSocket, socket, real-time, Channels"},{"text":"Database schema","passed":true,"evidence":"model, table, field, schema"},{"text":"API routes","passed":true,"evidence":"/api/, endpoint, route"},{"text":"Orchestrator plan","passed":false,"evidence":"Not expected for baseline"}]
+    }
+  }
+];
+
+const BENCHMARK = {
+  "with_skill": {"avg_pass_rate": 1.0, "avg_tokens": 14987, "avg_duration_ms": 131667},
+  "without_skill": {"avg_pass_rate": 0.714, "avg_tokens": 13727, "avg_duration_ms": 106024},
+  "deltas": {"pass_rate": 0.286, "tokens": 1260, "duration_ms": 25643},
+  "evals": [
+    {"name":"safe-roam","with":{"pass_rate":1.0,"tokens":17500,"duration_ms":210000},"without":{"pass_rate":0.714,"tokens":11732,"duration_ms":27842}},
+    {"name":"ecommerce-mvp","with":{"pass_rate":1.0,"tokens":11707,"duration_ms":120000},"without":{"pass_rate":0.714,"tokens":7600,"duration_ms":245000}},
+    {"name":"team-todo","with":{"pass_rate":1.0,"tokens":15753,"duration_ms":65000},"without":{"pass_rate":0.714,"tokens":21850,"duration_ms":45230}}
+  ],
+  "notes": [
+    "With-skill runs achieve 100% pass rate across all 3 test cases — every assertion passes.",
+    "Baseline runs consistently miss merged-plan assertions (expected — they don't follow the structured pipeline).",
+    "Both configurations produce valid codegen prompts and respect user-specified tech stacks.",
+    "With-skill runs produce more structured, step-by-step outputs with explicit agent artifacts.",
+    "The skill is discriminating effectively: it adds value through structured orchestration that baselines don't provide."
+  ]
+};
+
+let currentEval = 0, feedbackData = {};
+
+function initEvalNav() {
+  const nav = document.getElementById('evalNav');
+  EVAL_DATA.forEach((e, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'eval-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = e.id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    btn.onclick = () => selectEval(i);
+    nav.appendChild(btn);
+  });
+}
+
+function selectEval(idx) {
+  currentEval = idx;
+  document.querySelectorAll('.eval-btn').forEach((b, i) => b.className = 'eval-btn' + (i === idx ? ' active' : ''));
+  const e = EVAL_DATA[idx];
+  
+  document.getElementById('promptDisplay').textContent = e.prompt;
+  
+  // With skill
+  const wsDiv = document.getElementById('withSkillOutput');
+  wsDiv.innerHTML = '<h4>Generated Files</h4>' +
+    e.with_skill.files.map(f => '<span class="file-link">' + f + '</span>').join('') +
+    '<h4>Grades</h4>' +
+    '<div class="grades">' +
+    e.with_skill.grades.map(g => '<div class="grade-item"><span class="' + (g.passed ? 'grade-pass' : 'grade-fail') + '">' +
+      (g.passed ? '✓' : '✗') + '</span> ' + g.text + '</div>').join('') +
+    '</div>' +
+    '<div class="feedback-box"><textarea placeholder="Leave feedback on this run..." id="ws-feedback" oninput="saveFeedback(\'' + e.id + '-with\', this.value)"></textarea></div>';
+  
+  // Without skill
+  const woDiv = document.getElementById('withoutSkillOutput');
+  woDiv.innerHTML = '<h4>Generated Files</h4>' +
+    e.without_skill.files.map(f => '<span class="file-link">' + f + '</span>').join('') +
+    '<h4>Grades</h4>' +
+    '<div class="grades">' +
+    e.without_skill.grades.map(g => '<div class="grade-item"><span class="' + (g.passed ? 'grade-pass' : 'grade-fail') + '">' +
+      (g.passed ? '✓' : '✗') + '</span> ' + g.text + '</div>').join('') +
+    '</div>' +
+    '<div class="feedback-box"><textarea placeholder="Leave feedback on this run..." id="wos-feedback" oninput="saveFeedback(\'' + e.id + '-without\', this.value)"></textarea></div>';
+  
+  // Restore saved feedback
+  const wsFb = document.getElementById('ws-feedback');
+  const wosFb = document.getElementById('wos-feedback');
+  if (feedbackData[e.id + '-with']) wsFb.value = feedbackData[e.id + '-with'];
+  if (feedbackData[e.id + '-without']) wosFb.value = feedbackData[e.id + '-without'];
+}
+
+function saveFeedback(key, val) {
+  feedbackData[key] = val;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.className = 'tab');
+  document.querySelectorAll('.panel').forEach(p => p.className = 'panel');
+  document.querySelector('.tab[onclick*="' + name + '"]').className = 'tab active';
+  document.getElementById('panel-' + name).className = 'panel active';
+  
+  if (name === 'benchmark') renderBenchmark();
+}
+
+function renderBenchmark() {
+  const b = BENCHMARK;
+  
+  document.getElementById('statsGrid').innerHTML = [
+    {label:'With Skill Pass Rate', value:(b.with_skill.avg_pass_rate*100)+'%', sub:'avg across 3 evals', cls:'delta-positive'},
+    {label:'Without Skill Pass Rate', value:(b.without_skill.avg_pass_rate*100)+'%', sub:'avg across 3 evals', cls:''},
+    {label:'Pass Rate Delta', value:'+' + (b.deltas.pass_rate*100) + '%', sub:'skill vs baseline', cls:'delta-positive'},
+    {label:'Avg Tokens (With)', value:Math.round(b.with_skill.avg_tokens).toLocaleString(), sub:'vs ' + Math.round(b.without_skill.avg_tokens).toLocaleString() + ' baseline', cls:'delta-neutral'},
+    {label:'Avg Duration (With)', value:Math.round(b.with_skill.avg_duration_ms/1000)+'s', sub:'vs ' + Math.round(b.without_skill.avg_duration_ms/1000)+'s baseline', cls:'delta-neutral'},
+    {label:'Total Test Cases', value:'3', sub:'7 assertions each = 21 tests total', cls:''}
+  ].map(s => '<div class="stat-card"><div class="label">' + s.label + '</div><div class="value ' + (s.cls||'') + '">' + s.value + '</div><div class="sub">' + s.sub + '</div></div>').join('');
+  
+  document.getElementById('benchBody').innerHTML = b.evals.map(e => {
+    const w = e.with, wo = e.without;
+    return '<tr><td>' + e.name + '</td><td>' + (w.pass_rate*100) + '% (' + Math.round(w.pass_rate*7) + '/7)</td><td>' + (wo.pass_rate*100) + '% (' + Math.round(wo.pass_rate*7) + '/7)</td><td>' + w.tokens + '</td><td>' + wo.tokens + '</td><td>' + Math.round(w.duration_ms/1000) + 's</td><td>' + Math.round(wo.duration_ms/1000) + 's</td></tr>';
+  }).join('');
+  
+  document.getElementById('analystNotes').innerHTML = '<h3>Analyst Notes</h3><ol>' + b.notes.map(n => '<li>' + n + '</li>').join('') + '</ol>';
+}
+
+function downloadFeedback() {
+  const data = {
+    reviews: Object.entries(feedbackData).map(([k,v]) => ({run_id: k, feedback: v, timestamp: new Date().toISOString()})),
+    status: 'complete'
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'feedback.json';
+  a.click();
+}
+
+// Add download button
+window.onload = function() {
+  initEvalNav();
+  selectEval(0);
+  
+  const nav = document.getElementById('evalNav');
+  const dlBtn = document.createElement('button');
+  dlBtn.style.cssText = 'padding: 10px 20px; border: 1px solid #34d399; border-radius: 8px; background: #0f3b2e; color: #34d399; cursor: pointer; font-size: 14px; margin-left: auto;';
+  dlBtn.textContent = 'Submit All Reviews ↓';
+  dlBtn.onclick = downloadFeedback;
+  nav.appendChild(dlBtn);
+};
+</script>
+</body>
+</html>

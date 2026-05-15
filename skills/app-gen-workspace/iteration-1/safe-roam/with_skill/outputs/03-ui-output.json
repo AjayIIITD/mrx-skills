@@ -1,0 +1,146 @@
+{
+  "pages": [
+    {"route": "/login", "name": "Login", "purpose": "User login with email/password", "auth_required": false},
+    {"route": "/register", "name": "Register", "purpose": "New user registration", "auth_required": false},
+    {"route": "/", "name": "Dashboard", "purpose": "Main safety dashboard with stats overview", "auth_required": true},
+    {"route": "/sos", "name": "SOS Alert", "purpose": "One-tap SOS button with live location confirmation before sending", "auth_required": true},
+    {"route": "/contacts", "name": "Emergency Contacts", "purpose": "Manage emergency contacts (add/edit/delete)", "auth_required": true},
+    {"route": "/tracking", "name": "Route Tracking", "purpose": "Start a trip, view current route on map, see safe zone status", "auth_required": true},
+    {"route": "/history", "name": "History", "purpose": "View past trips and SOS alerts", "auth_required": true},
+    {"route": "/settings", "name": "Settings", "purpose": "Profile settings and app preferences", "auth_required": true}
+  ],
+  "navigation": {
+    "type": "bottom tab bar (mobile-first) + top header bar",
+    "links": [
+      {"label": "Dashboard", "path": "/", "icon": "Home"},
+      {"label": "SOS", "path": "/sos", "icon": "AlertTriangle"},
+      {"label": "Track", "path": "/tracking", "icon": "MapPin"},
+      {"label": "Contacts", "path": "/contacts", "icon": "Users"},
+      {"label": "History", "path": "/history", "icon": "Clock"}
+    ],
+    "auth_pages": ["/login", "/register"],
+    "mobile_behavior": "Bottom tab bar collapses to hamburger on desktop sidebar"
+  },
+  "tokens": {
+    "colors": {
+      "primary": "#7C3AED",        "primary_dark": "#5B21B6",
+      "secondary": "#06B6D4",       "secondary_dark": "#0891B2",
+      "danger": "#EF4444",          "danger_dark": "#DC2626",
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "background": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "text_primary": "#1E293B",
+      "text_secondary": "#64748B",
+      "border": "#E2E8F0"
+    },
+    "typography": {
+      "heading": "Inter, sans-serif",
+      "body": "Inter, sans-serif",
+      "sizes": {"h1": "24px", "h2": "20px", "h3": "16px", "body": "14px", "small": "12px"}
+    },
+    "spacing": {
+      "page_padding": "16px",
+      "card_padding": "16px",
+      "card_gap": "12px",
+      "section_gap": "24px"
+    },
+    "border_radius": {"sm": "6px", "md": "10px", "lg": "16px", "full": "9999px"},
+    "shadows": {"card": "0 1px 3px rgba(0,0,0,0.08)", "elevated": "0 4px 12px rgba(0,0,0,0.12)"}
+  },
+  "wireframes": [
+    {
+      "page": "Dashboard",
+      "layout": "Top header with app name and avatar. Main scrollable content area.",
+      "sections": [
+        "Top: Safety Score card (large number 0-100 with color: green >70, yellow 40-70, red <40 + trend arrow)",
+        "Row of 3 mini stat cards: Total Trips | SOS Alerts | Zone Alerts",
+        "Active trip card (if any trip in progress): shows current location on mini map + 'End Trip' button",
+        "Recent activity feed: list of last 10 events (trips completed, SOS triggered, alerts received) with icons and timestamps",
+        "Quick action FAB (floating button): SOS button always visible at bottom-right"
+      ]
+    },
+    {
+      "page": "SOS Alert",
+      "layout": "Full-page centered layout with a large prominent button",
+      "sections": [
+        "Large red SOS button in center (fills most of the viewport, pulsing animation)",
+        "Below button: current location preview (text: lat/lng + 'Tap to confirm location')",
+        "Below: list of emergency contacts that will be notified (name + relationship + phone)",
+        "Optional message text input: 'Add a voice note or message'",
+        "Safety tip: 'Only tap SOS in a real emergency. Contacts will receive your live location.'",
+        "Cancel/Back button at top-left"
+      ]
+    },
+    {
+      "page": "Route Tracking",
+      "layout": "Map takes full viewport. Overlay panels at bottom.",
+      "sections": [
+        "Full-screen Leaflet/Mapbox map showing current location marker and route path",
+        "Bottom sheet (draggable): shows trip status — Safe Zone ✅ / Caution ⚠️ / Unsafe 🚨 with color indicator",
+        "Start Trip form (when no active trip): 'Enter destination' text input + 'Start Tracking' button",
+        "Active trip overlay: elapsed time, distance covered, safe zone status badge",
+        "'End Trip' button (red, prominent) when trip is active",
+        "Alert popup when entering unsafe zone: full-screen warning with 'I'm Safe' acknowledge button"
+      ]
+    },
+    {
+      "page": "Emergency Contacts",
+      "layout": "List page with add button in header",
+      "sections": [
+        "Header with 'Add Contact' button (plus icon)",
+        "Contact list: each shows avatar circle (first letter), name, phone, relationship badge, swipe-to-delete",
+        "Add/Edit modal: form with fields [Name*, Phone*, Email, Relationship] + Save/Cancel buttons",
+        "Empty state: 'No emergency contacts yet. Add at least one to use SOS.' with illustration",
+        "Footer note: 'These contacts will be notified when you trigger SOS'"
+      ]
+    },
+    {
+      "page": "History",
+      "layout": "Tabbed view: Trips | SOS Alerts",
+      "sections": [
+        "Two tabs at top: 'Trips' and 'SOS Alerts'",
+        "Trips tab: list of past trips with date, start/end locations, duration, safe zone alerts count. Tap to expand map view.",
+        "SOS Alerts tab: list of past SOS triggers with timestamp, location (lat/lng), number of contacts notified, status (resolved/pending)",
+        "Each item shows a small map thumbnail, date badge, and key stats"
+      ]
+    },
+    {
+      "page": "Login / Register",
+      "layout": "Centered card on a gradient background",
+      "sections": [
+        "App logo + name 'SafeRoam' at top",
+        "Tagline: 'Your safety companion for Delhi'",
+        "Form fields with labels and validation errors inline",
+        "Submit button (full width, primary color)",
+        "Link to switch between Login / Register",
+        "'Forgot password?' link on login page"
+      ]
+    },
+    {
+      "page": "Settings",
+      "layout": "Simple list page with grouped sections",
+      "sections": [
+        "Profile section: Name, Email, Phone (editable fields)",
+        "Preferences: Safe zone alert radius slider, Auto-start tracking on app open toggle, Notification preferences",
+        "About: App version, Privacy Policy link, Terms of Service",
+        "Logout button (red, at bottom)"
+      ]
+    }
+  ],
+  "components": [
+    {"name": "SafetyScoreBadge", "props": ["score (0-100)"], "description": "Circular or pill badge with color-coded safety score"},
+    {"name": "StatCard", "props": ["label", "value", "icon", "color"], "description": "Small card showing a single metric"},
+    {"name": "SOSButton", "props": ["onTrigger", "loading", "cooldown"], "description": "Large pulsing red button with cooldown timer after use"},
+    {"name": "MiniMap", "props": ["latitude", "longitude", "height", "markers"], "description": "Small Leaflet map preview for cards"},
+    {"name": "ContactCard", "props": ["contact", "onDelete", "onEdit"], "description": "Contact list item with avatar, details, actions"},
+    {"name": "TripCard", "props": ["trip", "onExpand"], "description": "Trip history card with map thumbnail and stats"},
+    {"name": "AlertBanner", "props": ["type (safe|caution|unsafe)", "message"], "description": "Full-width colored alert bar"},
+    {"name": "ActivityItem", "props": ["icon", "title", "timestamp", "type"], "description": "Timeline-style recent activity row"},
+    {"name": "BottomSheet", "props": ["children", "open", "onClose"], "description": "Draggable bottom panel for map overlays"},
+    {"name": "TabBar", "props": ["tabs", "activeTab", "onChange"], "description": "Bottom tab bar with icons and labels"},
+    {"name": "FormField", "props": ["label", "type", "error", "value", "onChange"], "description": "Reusable form input with label and error"},
+    {"name": "LoadingSpinner", "props": ["size"], "description": "Full-page or inline loading indicator"},
+    {"name": "EmptyState", "props": ["title", "description", "actionLabel", "onAction"], "description": "Illustration + text for empty lists"}
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "app_name": "SafeRoam",
+  "pipeline": "app-gen with skill",
+  "iteration": "iteration-1",
+  "total_output_files": 8,
+  "total_bytes": 69974,
+  "estimated_tokens": 17500,
+  "duration_ms": 210000,
+  "duration_readable": "3 minutes 30 seconds",
+  "steps_completed": [
+    "01-orchestrator-plan",
+    "02-architect-output",
+    "03-ui-output",
+    "04-backend-output",
+    "05-database-output",
+    "06-merged-plan",
+    "07-final-codegen-prompt",
+    "timing"
+  ],
+  "generated_at": "2026-05-15T16:20:00+05:30"
+}

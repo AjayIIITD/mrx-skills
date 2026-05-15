@@ -1,0 +1,14 @@
+{
+  "eval_id": 0,
+  "eval_name": "safe-roam",
+  "prompt": "Mujhe ek women safety app banana hai for Delhi. Naam SafeRoam hai. Features chahiye: SOS alert with live location to emergency contacts, route tracking with safe zone alerts, and a dashboard showing safety stats. Web app chahiye, React + Node.js stack.",
+  "assertions": [
+    {"name": "has-merged-plan", "text": "Output includes a merged/unified plan file", "type": "file_exists", "target": "*merged*plan*"},
+    {"name": "has-codegen-prompt", "text": "Output includes a final codegen prompt file", "type": "file_exists", "target": "*codegen*prompt*"},
+    {"name": "has-tech-stack", "text": "Output specifies tech stack (React + Node.js)", "type": "content_check", "target": ["React", "Node", "Express"]},
+    {"name": "has-database-schema", "text": "Output includes database/table/collection definitions", "type": "content_check", "target": ["collection", "table", "schema", "field"]},
+    {"name": "has-api-routes", "text": "Output lists API endpoints", "type": "content_check", "target": ["/api/", "endpoint", "route", "GET", "POST"]},
+    {"name": "has-ui-pages", "text": "Output describes UI pages/screens", "type": "content_check", "target": ["page", "screen", "route"]},
+    {"name": "has-orchestrator-plan", "text": "Output includes an orchestrator/feature plan (with-skill only)", "type": "file_exists", "target": "*orchestrator*"}
+  ]
+}

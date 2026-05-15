@@ -1,0 +1,47 @@
+{
+  "app_name": "TeamTodo",
+  "description": "Team-based collaborative todo app with workspaces, projects, tasks, assignees, due dates, and real-time WebSocket updates",
+  "platform": "web (mobile responsive)",
+  "tech_stack": {
+    "frontend": "React + Tailwind CSS + React Router + React Query",
+    "backend": "Django 5 + Django REST Framework + Django Channels",
+    "database": "SQLite",
+    "realtime": "WebSockets via Django Channels (in-memory channel layer for MVP)",
+    "auth": "JWT via djangorestframework-simplejwt"
+  },
+  "features": [
+    {"id": "f1", "name": "User Authentication & Registration", "agent": "architect,backend,database"},
+    {"id": "f2", "name": "Workspace CRUD (create, list, invite members)", "agent": "architect,backend,ui,database"},
+    {"id": "f3", "name": "Project CRUD within Workspace", "agent": "architect,backend,ui,database"},
+    {"id": "f4", "name": "Task CRUD (assignee, due date, status)", "agent": "architect,backend,ui,database"},
+    {"id": "f5", "name": "Real-time WebSocket Updates (task changes, notifications)", "agent": "architect,backend"},
+    {"id": "f6", "name": "Mobile Responsive UI with Navigation", "agent": "ui"}
+  ],
+  "agent_tasks": {
+    "architect": [
+      "Define system architecture pattern",
+      "Design API contracts for all features",
+      "Define data flow including WebSocket events",
+      "Security considerations"
+    ],
+    "ui": [
+      "List all pages with routes and auth requirements",
+      "Design navigation flow (workspace → project → task)",
+      "Define UI tokens and component library",
+      "Wireframe key screens"
+    ],
+    "backend": [
+      "Define all Django REST API routes",
+      "Design Django Channels consumers for real-time",
+      "Service layer breakdown",
+      "Django project file structure"
+    ],
+    "database": [
+      "Design all Django models (tables, fields, types)",
+      "Define relationships and foreign keys",
+      "Indexes for query performance",
+      "Seed data suggestions"
+    ]
+  },
+  "execution_order": ["architect", "ui", "backend", "database"]
+}

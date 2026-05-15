@@ -1,0 +1,220 @@
+{
+  "architecture": {
+    "pattern": "Monolithic Django backend + SPA React frontend",
+    "reasoning": "Simplest viable MVP architecture. Django serves REST API + WebSocket via Channels. React SPA for rich interactive UI. No microservices needed at this scale.",
+    "data_flow": "Client → React Query → REST API (DRF) → Django ORM → SQLite. Real-time: Client WebSocket → Django Channels Consumer → Channel Layer → Broadcast to workspace group."
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "React 18 with Vite",
+      "styling": "Tailwind CSS 3",
+      "routing": "React Router v6",
+      "state_management": "React Query (server state) + React Context (auth/UI state)",
+      "realtime_client": "WebSocket native API + custom React hooks"
+    },
+    "backend": {
+      "runtime": "Python 3.11+",
+      "framework": "Django 5",
+      "api": "Django REST Framework 3.15",
+      "realtime": "Django Channels 4 + in-memory channel layer",
+      "auth": "djangorestframework-simplejwt",
+      "cors": "django-cors-headers"
+    },
+    "database": {
+      "engine": "SQLite",
+      "file": "db.sqlite3"
+    },
+    "deployment": {
+      "strategy": "Single server (e.g., Railway, Render, or PythonAnywhere)",
+      "static_files": "Django collectstatic or Vercel for frontend"
+    }
+  },
+  "components": [
+    {
+      "name": "Web Client (React SPA)",
+      "tech": "React + Vite + Tailwind",
+      "responsibility": "UI rendering, client-side routing, real-time WebSocket listener, API calls via React Query"
+    },
+    {
+      "name": "API Server (Django)",
+      "tech": "Django + DRF + Channels",
+      "responsibility": "REST API endpoints, business logic, authentication, WebSocket handling, ORM data access"
+    },
+    {
+      "name": "Database (SQLite)",
+      "tech": "SQLite",
+      "responsibility": "Data persistence — workspaces, projects, tasks, users, memberships"
+    },
+    {
+      "name": "Channel Layer (In-memory)",
+      "tech": "Django Channels in-memory layer",
+      "responsibility": "WebSocket message routing between Django consumers and connected clients"
+    }
+  ],
+  "api_contracts": [
+    {
+      "group": "Authentication",
+      "endpoints": [
+        {
+          "endpoint": "POST /api/auth/register/",
+          "auth": false,
+          "request": {"body": {"email": "string (email)", "password": "string (min 8)", "name": "string"}},
+          "response": {"id": "int", "email": "string", "name": "string"}
+        },
+        {
+          "endpoint": "POST /api/auth/login/",
+          "auth": false,
+          "request": {"body": {"email": "string", "password": "string"}},
+          "response": {"access": "string (JWT)", "refresh": "string (JWT)", "user": {"id": "int", "email": "string", "name": "string"}}
+        },
+        {
+          "endpoint": "POST /api/auth/token/refresh/",
+          "auth": false,
+          "request": {"body": {"refresh": "string (JWT)"}},
+          "response": {"access": "string (new JWT)"}
+        }
+      ]
+    },
+    {
+      "group": "Workspaces",
+      "endpoints": [
+        {
+          "endpoint": "GET /api/workspaces/",
+          "auth": true,
+          "description": "List workspaces the user is a member of",
+          "response": [{"id": "int", "name": "string", "description": "string", "member_count": "int", "created_at": "datetime"}]
+        },
+        {
+          "endpoint": "POST /api/workspaces/",
+          "auth": true,
+          "request": {"body": {"name": "string", "description": "string (optional)"}},
+          "response": {"id": "int", "name": "string", "description": "string", "created_at": "datetime"}
+        },
+        {
+          "endpoint": "GET /api/workspaces/{id}/",
+          "auth": true,
+          "description": "Workspace details",
+          "response": {"id": "int", "name": "string", "description": "string", "created_at": "datetime", "members": [{"id": "int", "name": "string", "email": "string", "role": "string"}]}
+        },
+        {
+          "endpoint": "PUT /api/workspaces/{id}/",
+          "auth": true,
+          "description": "Update workspace (admin only)",
+          "request": {"body": {"name": "string", "description": "string"}}
+        },
+        {
+          "endpoint": "DELETE /api/workspaces/{id}/",
+          "auth": true,
+          "description": "Delete workspace (admin only)"
+        },
+        {
+          "endpoint": "POST /api/workspaces/{id}/members/",
+          "auth": true,
+          "description": "Add member to workspace (admin only)",
+          "request": {"body": {"email": "string"}}
+        },
+        {
+          "endpoint": "DELETE /api/workspaces/{id}/members/{user_id}/",
+          "auth": true,
+          "description": "Remove member (admin only)"
+        }
+      ]
+    },
+    {
+      "group": "Projects",
+      "endpoints": [
+        {
+          "endpoint": "GET /api/workspaces/{workspace_id}/projects/",
+          "auth": true,
+          "description": "List projects in a workspace",
+          "response": [{"id": "int", "name": "string", "description": "string", "task_count": "int", "created_at": "datetime"}]
+        },
+        {
+          "endpoint": "POST /api/workspaces/{workspace_id}/projects/",
+          "auth": true,
+          "description": "Create project in workspace",
+          "request": {"body": {"name": "string", "description": "string (optional)"}}
+        },
+        {
+          "endpoint": "GET /api/projects/{id}/",
+          "auth": true,
+          "description": "Project details"
+        },
+        {
+          "endpoint": "PUT /api/projects/{id}/",
+          "auth": true,
+          "description": "Update project"
+        },
+        {
+          "endpoint": "DELETE /api/projects/{id}/",
+          "auth": true,
+          "description": "Delete project"
+        }
+      ]
+    },
+    {
+      "group": "Tasks",
+      "endpoints": [
+        {
+          "endpoint": "GET /api/projects/{project_id}/tasks/",
+          "auth": true,
+          "description": "List tasks in a project. Supports ?status=, ?assignee=, ?due_before=, ?due_after= filters",
+          "response": [{"id": "int", "title": "string", "description": "string", "status": "enum(todo,in_progress,done)", "priority": "enum(low,medium,high)", "assignee": {"id": "int", "name": "string"} | null, "due_date": "date | null", "created_at": "datetime", "updated_at": "datetime"}]
+        },
+        {
+          "endpoint": "POST /api/projects/{project_id}/tasks/",
+          "auth": true,
+          "description": "Create task",
+          "request": {"body": {"title": "string", "description": "string (optional)", "priority": "string (optional, default: medium)", "assignee_id": "int (optional)", "due_date": "date (optional)"}}
+        },
+        {
+          "endpoint": "GET /api/tasks/{id}/",
+          "auth": true,
+          "description": "Task details"
+        },
+        {
+          "endpoint": "PUT /api/tasks/{id}/",
+          "auth": true,
+          "description": "Full update task"
+        },
+        {
+          "endpoint": "PATCH /api/tasks/{id}/",
+          "auth": true,
+          "description": "Partial update (for drag-drop status changes)",
+          "request": {"body": {"status": "string", "assignee_id": "int", "due_date": "date"}}
+        },
+        {
+          "endpoint": "DELETE /api/tasks/{id}/",
+          "auth": true,
+          "description": "Delete task"
+        }
+      ]
+    },
+    {
+      "group": "WebSocket",
+      "description": "WebSocket connection for real-time updates within a workspace",
+      "endpoints": [
+        {
+          "endpoint": "ws /ws/workspace/{workspace_id}/",
+          "auth": "Token in URL query param (token=...JWT...)",
+          "events_received": ["task.created", "task.updated", "task.deleted", "task.status_changed", "project.created", "project.updated", "project.deleted", "member.added", "member.removed"],
+          "events_sent": {"type": "string", "payload": "object"},
+          "example_event": {"type": "task.updated", "payload": {"task_id": 1, "status": "done", "updated_by": {"id": 1, "name": "Alice"}}}
+        }
+      ]
+    }
+  ],
+  "data_flow": {
+    "auth_flow": "User registers → Login receives JWT access+refresh tokens → Access token sent in Authorization: Bearer header for all API calls → Refresh endpoint for new access token",
+    "crud_flow": "React Query mutation → DRF ViewSet → Serializer validates → View performs action → ORM query → SQLite → Response → React Query cache invalidation",
+    "realtime_flow": "User opens WebSocket on workspace page → Django Channels consumer authenticates via token → Consumer adds user to workspace group → Any mutation triggers group_send → Consumer receives event → Sends JSON over WebSocket → React hook updates UI"
+  },
+  "security": {
+    "auth": "JWT tokens (access: 15min, refresh: 7 days). Stored in memory (React) + httpOnly cookie option for refresh.",
+    "permissions": "DRF permissions check workspace membership. IsWorkspaceMember custom permission class.",
+    "validation": "DRF serializers with field-level validation.",
+    "cors": "django-cors-headers whitelist frontend origin.",
+    "input_sanitization": "Django auto-escapes, DRF serializers validate types.",
+    "rate_limiting": "DRF throttling on auth endpoints (5/min for login, 2/min for register)."
+  }
+}

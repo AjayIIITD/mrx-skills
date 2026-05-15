@@ -1,0 +1,8 @@
+{
+  "total_tokens": 11707,
+  "duration_ms": 120000,
+  "files_generated": 7,
+  "total_bytes": 46828,
+  "pipeline_steps": ["orchestrator", "architect", "ui", "backend", "database", "review_merge", "codegen_prompt"],
+  "generated_at": "2026-05-15T16:20:00+05:30"
+}

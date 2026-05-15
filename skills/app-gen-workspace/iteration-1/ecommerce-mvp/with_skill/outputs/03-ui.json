@@ -1,0 +1,104 @@
+{
+  "pages": [
+    {"route": "/", "name": "Home / Products", "purpose": "Product listing grid with search/filter", "auth_required": false},
+    {"route": "/products/[id]", "name": "Product Detail", "purpose": "View product details, add to cart", "auth_required": false},
+    {"route": "/cart", "name": "Shopping Cart", "purpose": "View cart items, adjust quantities, proceed to checkout", "auth_required": false},
+    {"route": "/checkout", "name": "Checkout", "purpose": "Review order and pay via Stripe", "auth_required": true},
+    {"route": "/checkout/success", "name": "Order Success", "purpose": "Order confirmation after payment", "auth_required": true},
+    {"route": "/orders", "name": "My Orders", "purpose": "View order history", "auth_required": true},
+    {"route": "/orders/[id]", "name": "Order Detail", "purpose": "View single order details", "auth_required": true},
+    {"route": "/login", "name": "Login", "purpose": "User login form", "auth_required": false},
+    {"route": "/register", "name": "Register", "purpose": "User registration form", "auth_required": false},
+    {"route": "/admin", "name": "Admin Dashboard", "purpose": "Admin overview with stats", "auth_required": true, "role": "admin"},
+    {"route": "/admin/products", "name": "Admin Products", "purpose": "Product CRUD management table", "auth_required": true, "role": "admin"},
+    {"route": "/admin/products/new", "name": "New Product", "purpose": "Add new product form", "auth_required": true, "role": "admin"},
+    {"route": "/admin/products/[id]/edit", "name": "Edit Product", "purpose": "Edit existing product form", "auth_required": true, "role": "admin"},
+    {"route": "/admin/orders", "name": "Admin Orders", "purpose": "View all orders with status management", "auth_required": true, "role": "admin"}
+  ],
+  "navigation": {
+    "type": "top navbar + bottom CTA (mobile) / sidebar (admin)",
+    "public_links": [
+      {"label": "Home", "path": "/"},
+      {"label": "Cart", "path": "/cart", "badge": "cart_count"},
+      {"label": "Orders", "path": "/orders"},
+      {"label": "Login", "path": "/login"},
+      {"label": "Register", "path": "/register"}
+    ],
+    "admin_links": [
+      {"label": "Dashboard", "path": "/admin"},
+      {"label": "Products", "path": "/admin/products"},
+      {"label": "Orders", "path": "/admin/orders"}
+    ]
+  },
+  "tokens": {
+    "colors": {
+      "primary": "#2563EB",
+      "primary_hover": "#1D4ED8",
+      "secondary": "#F59E0B",
+      "success": "#10B981",
+      "danger": "#EF4444",
+      "background": "#F9FAFB",
+      "surface": "#FFFFFF",
+      "text_primary": "#111827",
+      "text_secondary": "#6B7280",
+      "border": "#E5E7EB"
+    },
+    "typography": {
+      "heading": "Inter, system-ui, sans-serif",
+      "body": "Inter, system-ui, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "spacing": {
+      "page_padding": "16px md:24px",
+      "card_gap": "16px",
+      "section_gap": "32px"
+    },
+    "border_radius": {
+      "sm": "6px",
+      "md": "8px",
+      "lg": "12px",
+      "full": "9999px"
+    }
+  },
+  "wireframes": [
+    {
+      "page": "Home / Products",
+      "layout": "Top navbar → Hero/search bar → Product grid (2-3 cols on mobile, 4 on desktop) → Footer",
+      "sections": ["Navbar with logo, nav links, cart icon with badge", "Search/filter bar", "Product cards (image, name, price, Add to Cart button)", "Pagination"]
+    },
+    {
+      "page": "Product Detail",
+      "layout": "Two columns: left = image gallery, right = product info + actions",
+      "sections": ["Product image (large)", "Product name, description, price", "Quantity selector + Add to Cart button", "Stock indicator"]
+    },
+    {
+      "page": "Cart",
+      "layout": "Single column list with summary sidebar",
+      "sections": ["Cart item rows (image, name, qty, price, remove)", "Cart summary (subtotal, shipping, total)", "Checkout button (redirects to Stripe)"]
+    },
+    {
+      "page": "Admin Products",
+      "layout": "Admin sidebar left + main content right",
+      "sections": ["Admin nav sidebar", "Header with 'Add Product' button", "Table: image, name, price, stock, actions (edit/delete)"]
+    },
+    {
+      "page": "Checkout",
+      "layout": "Centered single column",
+      "sections": ["Order summary", "Stripe payment element", "Pay button"]
+    }
+  ],
+  "key_components": [
+    "ProductCard (image, name, price, add-to-cart)",
+    "CartItemRow (image, name, qty controls, price, remove)",
+    "Button (primary, secondary, ghost, sizes: sm/md/lg)",
+    "Input (text, number, textarea variants)",
+    "Modal (confirmation dialogs, e.g. delete confirm)",
+    "Table (admin product/order listing)",
+    "Badge (cart count, order status)",
+    "Navbar (public site)",
+    "AdminSidebar (admin panel)",
+    "LoadingSkeleton (product cards, tables)",
+    "EmptyState (no products, no orders)",
+    "ErrorState (fetch failures)"
+  ]
+}

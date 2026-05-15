@@ -1,0 +1,102 @@
+{
+  "provider": "postgresql",
+  "orm": "Prisma",
+  "models": [
+    {
+      "name": "User",
+      "fields": [
+        {"name": "id", "type": "String", "native": "UUID", "default": "cuid()", "primary": true},
+        {"name": "email", "type": "String", "native": "VARCHAR(255)", "unique": true, "required": true},
+        {"name": "passwordHash", "type": "String", "native": "VARCHAR(255)", "required": true},
+        {"name": "name", "type": "String", "native": "VARCHAR(100)", "required": true},
+        {"name": "role", "type": "String", "native": "VARCHAR(20)", "default": "'customer'", "required": true},
+        {"name": "createdAt", "type": "DateTime", "default": "now()"},
+        {"name": "updatedAt", "type": "DateTime", "updatedAt": true}
+      ],
+      "relations": [
+        {"name": "orders", "type": "hasMany", "model": "Order", "field": "userId"}
+      ]
+    },
+    {
+      "name": "Product",
+      "fields": [
+        {"name": "id", "type": "String", "native": "UUID", "default": "cuid()", "primary": true},
+        {"name": "name", "type": "String", "native": "VARCHAR(200)", "required": true},
+        {"name": "description", "type": "String", "native": "TEXT", "required": true},
+        {"name": "price", "type": "Int", "native": "INTEGER", "required": true, "note": "Price in cents to avoid float issues"},
+        {"name": "imageUrl", "type": "String", "native": "VARCHAR(500)", "required": true},
+        {"name": "stock", "type": "Int", "native": "INTEGER", "default": 0, "required": true},
+        {"name": "isPublished", "type": "Boolean", "default": true},
+        {"name": "deletedAt", "type": "DateTime?", "nullable": true},
+        {"name": "createdAt", "type": "DateTime", "default": "now()"},
+        {"name": "updatedAt", "type": "DateTime", "updatedAt": true}
+      ]
+    },
+    {
+      "name": "Order",
+      "fields": [
+        {"name": "id", "type": "String", "native": "UUID", "default": "cuid()", "primary": true},
+        {"name": "userId", "type": "String", "native": "UUID", "required": true, "foreignKey": "User.id"},
+        {"name": "stripeSessionId", "type": "String", "native": "VARCHAR(255)", "unique": true, "required": true},
+        {"name": "status", "type": "OrderStatus", "default": "'pending'"},
+        {"name": "total", "type": "Int", "native": "INTEGER", "required": true, "note": "Total in cents"},
+        {"name": "createdAt", "type": "DateTime", "default": "now()"},
+        {"name": "updatedAt", "type": "DateTime", "updatedAt": true}
+      ],
+      "relations": [
+        {"name": "user", "type": "belongsTo", "model": "User", "field": "userId"},
+        {"name": "items", "type": "hasMany", "model": "OrderItem", "field": "orderId"}
+      ]
+    },
+    {
+      "name": "OrderItem",
+      "fields": [
+        {"name": "id", "type": "String", "native": "UUID", "default": "cuid()", "primary": true},
+        {"name": "orderId", "type": "String", "native": "UUID", "required": true, "foreignKey": "Order.id"},
+        {"name": "productId", "type": "String", "native": "UUID", "required": true, "foreignKey": "Product.id"},
+        {"name": "productName", "type": "String", "native": "VARCHAR(200)", "required": true, "note": "Snapshot of product name at purchase time"},
+        {"name": "price", "type": "Int", "native": "INTEGER", "required": true, "note": "Snapshot of price at purchase time (in cents)"},
+        {"name": "quantity", "type": "Int", "native": "INTEGER", "required": true}
+      ],
+      "relations": [
+        {"name": "order", "type": "belongsTo", "model": "Order", "field": "orderId"},
+        {"name": "product", "type": "belongsTo", "model": "Product", "field": "productId"}
+      ]
+    }
+  ],
+  "enums": [
+    {
+      "name": "OrderStatus",
+      "values": ["pending", "processing", "shipped", "delivered", "cancelled"]
+    }
+  ],
+  "relationships": [
+    {"from": "Order.userId", "to": "User.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "OrderItem.orderId", "to": "Order.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "OrderItem.productId", "to": "Product.id", "type": "many-to-one", "on_delete": "RESTRICT"}
+  ],
+  "indexes": [
+    {"table": "Product", "fields": ["isPublished", "deletedAt"], "type": "BTREE", "reason": "Filter published, non-deleted products for public listing"},
+    {"table": "Product", "fields": ["name"], "type": "BTREE", "reason": "Search products by name"},
+    {"table": "Order", "fields": ["userId"], "type": "BTREE", "reason": "Lookup orders by user"},
+    {"table": "Order", "fields": ["stripeSessionId"], "type": "BTREE", "unique": true, "reason": "Lookup by Stripe session on webhook"},
+    {"table": "Order", "fields": ["status", "createdAt"], "type": "BTREE", "reason": "Admin order filtering and sorting"},
+    {"table": "OrderItem", "fields": ["orderId"], "type": "BTREE", "reason": "Lookup items for an order"},
+    {"table": "OrderItem", "fields": ["productId"], "type": "BTREE", "reason": "Lookup orders containing a product"}
+  ],
+  "seed_data": {
+    "admin_user": {
+      "email": "admin@ecoshop.com",
+      "password": "admin123!",
+      "name": "Admin",
+      "role": "admin"
+    },
+    "products": [
+      {"name": "Classic White T-Shirt", "description": "Premium 100% cotton white t-shirt. Comfortable and breathable.", "price": 2999, "imageUrl": "https://placehold.co/600x600/eee/999?text=T-Shirt", "stock": 50},
+      {"name": "Denim Jacket", "description": "Classic blue denim jacket with a modern fit.", "price": 7999, "imageUrl": "https://placehold.co/600x600/eee/999?text=Jacket", "stock": 25},
+      {"name": "Wireless Headphones", "description": "Noise-cancelling wireless headphones with 30hr battery.", "price": 14999, "imageUrl": "https://placehold.co/600x600/eee/999?text=Headphones", "stock": 30},
+      {"name": "Leather Backpack", "description": "Genuine leather backpack with laptop compartment.", "price": 8999, "imageUrl": "https://placehold.co/600x600/eee/999?text=Backpack", "stock": 15},
+      {"name": "Running Shoes", "description": "Lightweight running shoes with cushioned sole.", "price": 11999, "imageUrl": "https://placehold.co/600x600/eee/999?text=Shoes", "stock": 40}
+    ]
+  }
+}

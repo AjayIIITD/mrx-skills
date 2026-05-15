@@ -1,0 +1,169 @@
+{
+  "project_name": "team_todo_backend",
+  "routes": [
+    {
+      "group": "Authentication",
+      "base_path": "/api/auth/",
+      "endpoints": [
+        {"method": "POST", "path": "register/", "auth": false, "description": "Register new user", "controller": "accounts.views.RegisterView", "validation": {"email": "required, unique, valid email", "password": "required, min 8 chars", "name": "required, max 100 chars"}, "response": {"id": "int", "email": "string", "name": "string"}},
+        {"method": "POST", "path": "login/", "auth": false, "description": "Login, returns JWT tokens", "controller": "accounts.views.LoginView", "validation": {"email": "required", "password": "required"}, "response": {"access": "string", "refresh": "string", "user": {"id": "int", "email": "string", "name": "string"}}},
+        {"method": "POST", "path": "token/refresh/", "auth": false, "description": "Refresh JWT access token", "controller": "token_obtain_pair (simplejwt)"},
+        {"method": "GET", "path": "me/", "auth": true, "description": "Get current user profile", "controller": "accounts.views.MeView"},
+        {"method": "PUT", "path": "me/", "auth": true, "description": "Update profile (name, email, password)", "controller": "accounts.views.UpdateProfileView"}
+      ]
+    },
+    {
+      "group": "Workspaces",
+      "base_path": "/api/workspaces/",
+      "endpoints": [
+        {"method": "GET", "path": "", "auth": true, "description": "List user's workspaces", "controller": "workspaces.views.WorkspaceListView", "permissions": ["IsAuthenticated"]},
+        {"method": "POST", "path": "", "auth": true, "description": "Create workspace (creator becomes admin)", "controller": "workspaces.views.WorkspaceCreateView", "validation": {"name": "required, max 200", "description": "optional, max 500"}},
+        {"method": "GET", "path": "{id}/", "auth": true, "description": "Workspace detail with members", "controller": "workspaces.views.WorkspaceDetailView", "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "PUT", "path": "{id}/", "auth": true, "description": "Update workspace", "permissions": ["IsAuthenticated", "IsWorkspaceAdmin"]},
+        {"method": "DELETE", "path": "{id}/", "auth": true, "description": "Delete workspace", "permissions": ["IsAuthenticated", "IsWorkspaceAdmin"]},
+        {"method": "GET", "path": "{id}/members/", "auth": true, "description": "List workspace members", "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "POST", "path": "{id}/members/", "auth": true, "description": "Add member by email", "permissions": ["IsAuthenticated", "IsWorkspaceAdmin"], "validation": {"email": "required, valid email, must be registered user"}},
+        {"method": "DELETE", "path": "{id}/members/{user_id}/", "auth": true, "description": "Remove member", "permissions": ["IsAuthenticated", "IsWorkspaceAdmin"]}
+      ]
+    },
+    {
+      "group": "Projects",
+      "base_path": "/api/",
+      "endpoints": [
+        {"method": "GET", "path": "workspaces/{workspace_id}/projects/", "auth": true, "description": "List projects in workspace", "controller": "projects.views.ProjectListView", "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "POST", "path": "workspaces/{workspace_id}/projects/", "auth": true, "description": "Create project", "controller": "projects.views.ProjectCreateView", "validation": {"name": "required, max 200", "description": "optional, max 500"}, "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "GET", "path": "projects/{id}/", "auth": true, "description": "Project detail", "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "PUT", "path": "projects/{id}/", "auth": true, "description": "Update project", "permissions": ["IsAuthenticated", "IsWorkspaceAdmin"]},
+        {"method": "DELETE", "path": "projects/{id}/", "auth": true, "description": "Delete project", "permissions": ["IsAuthenticated", "IsWorkspaceAdmin"]}
+      ]
+    },
+    {
+      "group": "Tasks",
+      "base_path": "/api/",
+      "endpoints": [
+        {"method": "GET", "path": "projects/{project_id}/tasks/", "auth": true, "description": "List tasks with filtering", "controller": "tasks.views.TaskListView", "permissions": ["IsAuthenticated", "IsWorkspaceMember"], "query_params": {"status": "string (optional, filter by status)", "assignee": "int (optional, filter by assignee ID)", "due_before": "date (optional)", "due_after": "date (optional)", "priority": "string (optional)", "search": "string (optional, title search)"}},
+        {"method": "POST", "path": "projects/{project_id}/tasks/", "auth": true, "description": "Create task", "controller": "tasks.views.TaskCreateView", "validation": {"title": "required, max 300", "description": "optional", "priority": "optional, one of low/medium/high", "assignee_id": "optional, int", "due_date": "optional, date YYYY-MM-DD"}, "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "GET", "path": "tasks/{id}/", "auth": true, "description": "Task detail", "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "PUT", "path": "tasks/{id}/", "auth": true, "description": "Full update task", "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "PATCH", "path": "tasks/{id}/", "auth": true, "description": "Partial update (status change, drag-drop)", "permissions": ["IsAuthenticated", "IsWorkspaceMember"]},
+        {"method": "DELETE", "path": "tasks/{id}/", "auth": true, "description": "Delete task", "permissions": ["IsAuthenticated", "IsWorkspaceAdmin"]}
+      ]
+    }
+  ],
+  "consumers": {
+    "name": "WorkspaceConsumer",
+    "path": "consumers/workspace.py",
+    "protocol": "WebSocket",
+    "connect_path": "ws/workspace/{workspace_id}/",
+    "auth_method": "JWT token passed as ?token= query param on connect",
+    "events": {
+      "outgoing": [
+        {"type": "task.created", "payload": {"task": "TaskSerializer data"}},
+        {"type": "task.updated", "payload": {"task": "TaskSerializer data", "changes": ["field1", "field2"]}},
+        {"type": "task.deleted", "payload": {"task_id": "int"}},
+        {"type": "task.status_changed", "payload": {"task_id": "int", "old_status": "string", "new_status": "string", "changed_by": {"id": "int", "name": "string"}}},
+        {"type": "project.created", "payload": {"project": "ProjectSerializer data"}},
+        {"type": "project.updated", "payload": {"project": "ProjectSerializer data"}},
+        {"type": "project.deleted", "payload": {"project_id": "int"}},
+        {"type": "member.added", "payload": {"user": {"id": "int", "name": "string", "email": "string"}}},
+        {"type": "member.removed", "payload": {"user_id": "int"}}
+      ],
+      "incoming": [
+        {"type": "ping", "description": "Keepalive, server responds with pong"}
+      ]
+    },
+    "implementation": "AsyncConsumer using channels.generic.websocket.AsyncJsonWebsocketConsumer. On connect, authenticate via JWT, validate workspace membership, add to channel layer group 'workspace_{id}'. On disconnect, remove from group. Events sent via async_to_sync(channel_layer.group_send) from Django signal receivers."
+  },
+  "services": [
+    {"name": "AuthService", "methods": ["register_user", "authenticate_user", "get_user_by_id", "update_profile"], "dependencies": ["User model", "JWT token generation"]},
+    {"name": "WorkspaceService", "methods": ["create_workspace", "get_user_workspaces", "get_workspace_detail", "update_workspace", "delete_workspace", "add_member", "remove_member", "is_member", "is_admin"], "dependencies": ["Workspace model", "WorkspaceMember model"]},
+    {"name": "ProjectService", "methods": ["create_project", "get_project_list", "get_project_detail", "update_project", "delete_project"], "dependencies": ["Project model", "Workspace model", "WorkspaceService.is_member"]},
+    {"name": "TaskService", "methods": ["create_task", "get_task_list", "get_task_detail", "update_task", "partial_update_task", "delete_task", "assign_task"], "dependencies": ["Task model", "Project model", "User model", "WebSocket notification"]}
+  ],
+  "middleware": [
+    {"name": "AuthMiddleware", "type": "DRF authentication class", "class": "rest_framework_simplejwt.authentication.JWTAuthentication", "applies_to": "All /api/ routes except /api/auth/register/, /api/auth/login/, /api/auth/token/refresh/"},
+    {"name": "WorkspacePermission", "type": "DRF permission class", "class": "apps.workspaces.permissions.IsWorkspaceMember", "applies_to": "Any endpoint with workspace_id or project_id (which belongs to a workspace)"},
+    {"name": "AdminPermission", "type": "DRF permission class", "class": "apps.workspaces.permissions.IsWorkspaceAdmin", "applies_to": "DELETE workspace, DELETE project, member management"},
+    {"name": "ValidationMiddleware", "type": "DRF serializer validation", "description": "Built into DRF serializers — field-level and object-level validation"},
+    {"name": "ErrorHandler", "type": "Django middleware", "class": "config.middleware.ErrorHandlerMiddleware", "description": "Catches unhandled exceptions and returns JSON error response"},
+    {"name": "CORSMiddleware", "type": "Django middleware", "class": "corsheaders.middleware.CorsMiddleware", "applies_to": "All requests"},
+    {"name": "Throttling", "type": "DRF throttling", "auth_endpoints": "AnonRateThrottle (5/min for login, 2/min for register)", "api_endpoints": "UserRateThrottle (60/min for authenticated)"}
+  ],
+  "structure": {
+    "team_todo_backend/": {
+      "manage.py": "Django CLI entry point",
+      "requirements.txt": "Django, djangorestframework, channels, djangorestframework-simplejwt, django-cors-headers, channels-redis (optional for production)",
+      "config/": {
+        "__init__.py": "",
+        "settings.py": "Django settings — INSTALLED_APPS, DATABASES, CHANNEL_LAYERS, REST_FRAMEWORK, SIMPLE_JWT, CORS",
+        "urls.py": "Root URL config — include app URLs, /api/ prefix",
+        "asgi.py": "ASGI config for Channels protocol routing",
+        "wsgi.py": "WSGI config for traditional HTTP",
+        "middleware.py": "Custom error handler middleware"
+      },
+      "apps/": {
+        "__init__.py": "",
+        "accounts/": {
+          "__init__.py": "",
+          "models.py": "User model (extend AbstractUser or custom)",
+          "serializers.py": "RegisterSerializer, LoginSerializer, UserSerializer, ProfileSerializer",
+          "views.py": "RegisterView, LoginView, MeView, UpdateProfileView",
+          "urls.py": "URL patterns for auth endpoints"
+        },
+        "workspaces/": {
+          "__init__.py": "",
+          "models.py": "Workspace, WorkspaceMember",
+          "serializers.py": "WorkspaceSerializer, WorkspaceDetailSerializer, WorkspaceMemberSerializer, AddMemberSerializer",
+          "views.py": "WorkspaceListView, WorkspaceCreateView, WorkspaceDetailView, WorkspaceMemberView",
+          "urls.py": "URL patterns",
+          "permissions.py": "IsWorkspaceMember, IsWorkspaceAdmin"
+        },
+        "projects/": {
+          "__init__.py": "",
+          "models.py": "Project",
+          "serializers.py": "ProjectSerializer, ProjectDetailSerializer",
+          "views.py": "ProjectListView, ProjectCreateView, ProjectDetailView",
+          "urls.py": "URL patterns"
+        },
+        "tasks/": {
+          "__init__.py": "",
+          "models.py": "Task",
+          "serializers.py": "TaskSerializer, TaskCreateSerializer, TaskUpdateSerializer",
+          "views.py": "TaskListView, TaskCreateView, TaskDetailView",
+          "urls.py": "URL patterns"
+        }
+      },
+      "consumers/": {
+        "__init__.py": "",
+        "workspace.py": "WorkspaceConsumer — AsyncJsonWebsocketConsumer with connect/disconnect/receive",
+        "middleware.py": "TokenAuthMiddleware for WebSocket"
+      },
+      "signals/": {
+        "__init__.py": "",
+        "handlers.py": "Signal receivers for Task/Project model events that broadcast via WebSocket"
+      },
+      "templates/": {
+        "index.html": "Single HTML file serving React SPA (or redirect to frontend URL)"
+      },
+      "static/": "Collected static files (if serving frontend from Django)"
+    }
+  },
+  "error_handling": {
+    "format": {"error": {"code": "ERROR_CODE", "message": "Human-readable message", "details": []}},
+    "common_codes": {
+      "VALIDATION_ERROR": "Request body validation failed",
+      "AUTH_FAILED": "Invalid credentials or expired token",
+      "NOT_FOUND": "Resource not found",
+      "PERMISSION_DENIED": "User lacks required permission",
+      "DUPLICATE_ENTRY": "Resource already exists",
+      "RATE_LIMITED": "Too many requests, try later"
+    }
+  },
+  "auth_flow": {
+    "registration": "POST /api/auth/register/ → Create User → Return user data",
+    "login": "POST /api/auth/login/ → Validate credentials → Return JWT access + refresh tokens + user data",
+    "authenticated_request": "Client sends Authorization: Bearer <access_token> → JWTAuthentication verifies → request.user populated",
+    "token_refresh": "POST /api/auth/token/refresh/ with refresh token body → Returns new access token",
+    "websocket_auth": "Client connects ws://host/ws/workspace/{id}/?token=<access_token> → Consumer verifies JWT → Checks workspace membership → Accepts or closes"
+  }
+}

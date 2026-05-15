@@ -1,0 +1,14 @@
+{
+  "total_tokens": 21850,
+  "duration_ms": 45230,
+  "breakdown": {
+    "architecture.md": 4200,
+    "database-schema.md": 2100,
+    "ui-ux.md": 3450,
+    "api-design.md": 2850,
+    "final-codegen-prompt.md": 8250,
+    "system_and_overhead": 1000
+  },
+  "model": "deepseek-v4-flash-free",
+  "files_created": 6
+}

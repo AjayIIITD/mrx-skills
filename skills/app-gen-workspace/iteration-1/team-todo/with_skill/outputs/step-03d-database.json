@@ -1,0 +1,122 @@
+{
+  "engine": "SQLite",
+  "tables": [
+    {
+      "name": "users",
+      "django_model": "apps.accounts.models.User (AbstractUser)",
+      "description": "Extends Django's built-in AbstractUser. We use email as the unique identifier instead of username.",
+      "fields": [
+        {"name": "id", "type": "AutoField", "primary": true, "description": "Auto-incrementing primary key"},
+        {"name": "email", "type": "EmailField", "unique": true, "required": true, "max_length": 254, "description": "Login identifier"},
+        {"name": "password", "type": "CharField", "required": true, "max_length": 128, "description": "Hashed password (Django handles bcrypt)"},
+        {"name": "name", "type": "CharField", "required": true, "max_length": 100},
+        {"name": "is_active", "type": "BooleanField", "default": true},
+        {"name": "date_joined", "type": "DateTimeField", "default": "now"},
+        {"name": "last_login", "type": "DateTimeField", "null": true}
+      ],
+      "meta": {"ordering": ["-date_joined"], "verbose_name": "User", "verbose_name_plural": "Users"}
+    },
+    {
+      "name": "workspaces",
+      "django_model": "apps.workspaces.models.Workspace",
+      "description": "Top-level organizational unit. A team/group workspace that contains projects and members.",
+      "fields": [
+        {"name": "id", "type": "AutoField", "primary": true},
+        {"name": "name", "type": "CharField", "required": true, "max_length": 200},
+        {"name": "description", "type": "TextField", "required": false, "blank": true, "max_length": 500},
+        {"name": "created_by", "type": "ForeignKey", "references": "users.id", "required": true, "on_delete": "CASCADE", "description": "Workspace creator (becomes admin)"},
+        {"name": "created_at", "type": "DateTimeField", "auto_now_add": true},
+        {"name": "updated_at", "type": "DateTimeField", "auto_now": true}
+      ],
+      "meta": {"ordering": ["-created_at"], "verbose_name": "Workspace"}
+    },
+    {
+      "name": "workspace_members",
+      "django_model": "apps.workspaces.models.WorkspaceMember",
+      "description": "Many-to-many relationship between users and workspaces with role information.",
+      "fields": [
+        {"name": "id", "type": "AutoField", "primary": true},
+        {"name": "workspace", "type": "ForeignKey", "references": "workspaces.id", "required": true, "on_delete": "CASCADE", "related_name": "memberships"},
+        {"name": "user", "type": "ForeignKey", "references": "users.id", "required": true, "on_delete": "CASCADE", "related_name": "workspace_memberships"},
+        {"name": "role", "type": "CharField", "required": true, "max_length": 20, "choices": ["admin", "member"], "default": "member"},
+        {"name": "joined_at", "type": "DateTimeField", "auto_now_add": true}
+      ],
+      "meta": {"unique_together": [["workspace", "user"]], "ordering": ["-role", "joined_at"]}
+    },
+    {
+      "name": "projects",
+      "django_model": "apps.projects.models.Project",
+      "description": "A project belongs to a workspace and contains tasks.",
+      "fields": [
+        {"name": "id", "type": "AutoField", "primary": true},
+        {"name": "workspace", "type": "ForeignKey", "references": "workspaces.id", "required": true, "on_delete": "CASCADE", "related_name": "projects"},
+        {"name": "name", "type": "CharField", "required": true, "max_length": 200},
+        {"name": "description", "type": "TextField", "required": false, "blank": true, "max_length": 500},
+        {"name": "created_by", "type": "ForeignKey", "references": "users.id", "required": true, "on_delete": "CASCADE", "related_name": "created_projects"},
+        {"name": "created_at", "type": "DateTimeField", "auto_now_add": true},
+        {"name": "updated_at", "type": "DateTimeField", "auto_now": true}
+      ],
+      "meta": {"ordering": ["-created_at"], "verbose_name": "Project", "indexes": [{"fields": ["workspace"]}]}
+    },
+    {
+      "name": "tasks",
+      "django_model": "apps.tasks.models.Task",
+      "description": "Individual task item within a project. Supports assignee, due date, priority, and status tracking.",
+      "fields": [
+        {"name": "id", "type": "AutoField", "primary": true},
+        {"name": "project", "type": "ForeignKey", "references": "projects.id", "required": true, "on_delete": "CASCADE", "related_name": "tasks"},
+        {"name": "title", "type": "CharField", "required": true, "max_length": 300},
+        {"name": "description", "type": "TextField", "required": false, "blank": true},
+        {"name": "status", "type": "CharField", "required": true, "max_length": 20, "choices": ["todo", "in_progress", "done"], "default": "todo"},
+        {"name": "priority", "type": "CharField", "required": true, "max_length": 10, "choices": ["low", "medium", "high"], "default": "medium"},
+        {"name": "assignee", "type": "ForeignKey", "references": "users.id", "required": false, "null": true, "on_delete": "SET_NULL", "related_name": "assigned_tasks"},
+        {"name": "due_date", "type": "DateField", "required": false, "null": true, "blank": true},
+        {"name": "created_by", "type": "ForeignKey", "references": "users.id", "required": true, "on_delete": "CASCADE", "related_name": "created_tasks"},
+        {"name": "created_at", "type": "DateTimeField", "auto_now_add": true},
+        {"name": "updated_at", "type": "DateTimeField", "auto_now": true}
+      ],
+      "meta": {
+        "ordering": ["-priority", "due_date", "-created_at"],
+        "verbose_name": "Task",
+        "indexes": [
+          {"fields": ["project", "status"], "type": "BTREE", "description": "Filter tasks by status within a project (Kanban columns)"},
+          {"fields": ["assignee"], "type": "BTREE", "description": "Find tasks assigned to a user"},
+          {"fields": ["due_date"], "type": "BTREE", "description": "Sort/filter by due date"},
+          {"fields": ["project", "assignee", "status"], "type": "BTREE", "description": "Compound index for common filtered queries"}
+        ]
+      }
+    }
+  ],
+  "relationships": [
+    {"from": "workspaces.created_by", "to": "users.id", "type": "many-to-one", "on_delete": "CASCADE", "description": "A user can create many workspaces"},
+    {"from": "workspace_members.workspace", "to": "workspaces.id", "type": "many-to-one", "on_delete": "CASCADE", "description": "Workspace has many members"},
+    {"from": "workspace_members.user", "to": "users.id", "type": "many-to-one", "on_delete": "CASCADE", "description": "User belongs to many workspaces"},
+    {"from": "projects.workspace", "to": "workspaces.id", "type": "many-to-one", "on_delete": "CASCADE", "description": "Workspace has many projects"},
+    {"from": "projects.created_by", "to": "users.id", "type": "many-to-one", "on_delete": "CASCADE", "description": "User creates many projects"},
+    {"from": "tasks.project", "to": "projects.id", "type": "many-to-one", "on_delete": "CASCADE", "description": "Project has many tasks"},
+    {"from": "tasks.assignee", "to": "users.id", "type": "many-to-one", "on_delete": "SET_NULL", "description": "User can be assigned many tasks (optional)"},
+    {"from": "tasks.created_by", "to": "users.id", "type": "many-to-one", "on_delete": "CASCADE", "description": "User creates many tasks"}
+  ],
+  "indexes_summary": [
+    {"table": "workspace_members", "fields": ["workspace", "user"], "type": "UNIQUE", "description": "Ensure a user can only be added once to a workspace"},
+    {"table": "projects", "fields": ["workspace"], "type": "BTREE", "description": "Quick lookup of projects by workspace"},
+    {"table": "tasks", "fields": ["project", "status"], "type": "BTREE", "description": "Primary query pattern: get all tasks in a project, filtered by status"},
+    {"table": "tasks", "fields": ["assignee"], "type": "BTREE", "description": "Get all tasks assigned to a user across projects"},
+    {"table": "tasks", "fields": ["due_date"], "type": "BTREE", "description": "Sort/filter tasks by due date"},
+    {"table": "tasks", "fields": ["project", "assignee", "status"], "type": "BTREE", "description": "Compound index for multi-filter queries"}
+  ],
+  "enums": [
+    {"name": "MembershipRole", "values": ["admin", "member"], "description": "Role within a workspace. Admin can manage members, delete workspace, delete projects. Member can create/edit tasks and projects."},
+    {"name": "TaskStatus", "values": ["todo", "in_progress", "done"], "description": "Current state of a task. Maps to Kanban columns."},
+    {"name": "TaskPriority", "values": ["low", "medium", "high"], "description": "Priority level. Determines ordering and visual indicator."}
+  ],
+  "seed_data": [
+    {"description": "No seed data required. App starts empty. First user to register creates their first workspace."}
+  ],
+  "notes": [
+    "Use Django's built-in User model (AbstractUser) with EMAIL_FIELD = 'email' and USERNAME_FIELD = 'email' for email-based auth.",
+    "Soft deletes are optional for MVP — hard deletes are simpler and fine for SQLite scale.",
+    "Timestamps (created_at, updated_at) on all entity tables for auditing.",
+    "SQLite handles the load fine for teams of < 50 concurrent users. For larger scale, migrate to PostgreSQL."
+  ]
+}

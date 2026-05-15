@@ -1,0 +1,23 @@
+{
+  "app_name": "EcoShop MVP",
+  "description": "Simple e-commerce MVP with product browsing, shopping cart, Stripe checkout, and admin product management.",
+  "platform": "web",
+  "tech_stack": {
+    "frontend": "Next.js (React, SSR)",
+    "backend": "Next.js API Routes (monolith)",
+    "database": "PostgreSQL with Prisma ORM"
+  },
+  "features": [
+    {"id": "f1", "name": "Product Listing & Browsing", "agent": "architect,backend,database,ui"},
+    {"id": "f2", "name": "Shopping Cart", "agent": "architect,backend,ui"},
+    {"id": "f3", "name": "Stripe Checkout", "agent": "architect,backend,ui"},
+    {"id": "f4", "name": "Admin Panel — Product CRUD", "agent": "architect,backend,database,ui"},
+    {"id": "f5", "name": "Order Management", "agent": "architect,backend,database,ui"}
+  ],
+  "agent_tasks": {
+    "architect": ["Define system architecture (monolith)", "Confirm/refine tech stack", "Design API contracts", "Data flow for cart→checkout→payment"],
+    "ui": ["Design page layouts (products, cart, checkout, admin)", "Define navigation flow", "UI tokens", "Wireframe descriptions"],
+    "backend": ["Define API routes (products, cart, checkout, admin)", "Stripe integration logic", "Service layer", "Auth/middleware plan"],
+    "database": ["Design Prisma schema", "Define models and relationships", "Indexes", "Seed data"]
+  }
+}

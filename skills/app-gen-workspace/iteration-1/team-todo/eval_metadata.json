@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "team-todo",
+  "prompt": "Ek team-based todo app banao. Features: workspaces, multiple projects per workspace, tasks with assignees and due dates, real-time updates via WebSockets. Mobile responsive web app. Backend mein Django use karna hai with SQLite for now.",
+  "assertions": [
+    {"name": "has-merged-plan", "text": "Output includes a merged/unified plan file", "type": "file_exists", "target": "*merged*plan*"},
+    {"name": "has-codegen-prompt", "text": "Output includes a final codegen prompt file", "type": "file_exists", "target": "*codegen*prompt*"},
+    {"name": "respects-user-stack", "text": "Output uses the user-specified tech stack (Django + SQLite)", "type": "content_check", "target": ["Django", "SQLite", "sqlite"]},
+    {"name": "has-websocket-support", "text": "Output includes WebSocket/real-time support", "type": "content_check", "target": ["WebSocket", "wss", "socket", "realtime", "real-time", "Channels"]},
+    {"name": "has-database-schema", "text": "Output includes database schema definitions", "type": "content_check", "target": ["model", "table", "field", "schema"]},
+    {"name": "has-api-routes", "text": "Output lists API endpoints", "type": "content_check", "target": ["/api/", "endpoint", "route"]},
+    {"name": "has-orchestrator-plan", "text": "Output includes an orchestrator/feature plan (with-skill only)", "type": "file_exists", "target": "*orchestrator*"}
+  ]
+}

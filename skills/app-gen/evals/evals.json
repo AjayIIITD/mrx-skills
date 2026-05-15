@@ -1,0 +1,23 @@
+{
+  "skill_name": "app-gen",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Mujhe ek women safety app banana hai for Delhi. Naam SafeRoam hai. Features chahiye: SOS alert with live location to emergency contacts, route tracking with safe zone alerts, and a dashboard showing safety stats. Web app chahiye, React + Node.js stack.",
+      "expected_output": "Full pipeline output: orchestrator plan, agent outputs (architect, ui, backend, database), merged plan in markdown table format, and final codegen prompt",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I want to build a simple e-commerce site. Just an MVP — products page, cart, checkout with Stripe, and an admin panel to manage products. Tech stack: Next.js + Prisma + PostgreSQL. Keep it simple, can be a monolith.",
+      "expected_output": "Full pipeline output: orchestrator plan, agent outputs, merged plan, and final codegen prompt",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Ek team-based todo app banao. Features: workspaces, multiple projects per workspace, tasks with assignees and due dates, real-time updates via WebSockets. Mobile responsive web app. Backend mein Django use karna hai with SQLite for now.",
+      "expected_output": "Full pipeline output: orchestrator plan, agent outputs, merged plan, and final codegen prompt",
+      "files": []
+    }
+  ]
+}

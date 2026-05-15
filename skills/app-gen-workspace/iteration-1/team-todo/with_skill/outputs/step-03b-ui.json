@@ -1,0 +1,117 @@
+{
+  "pages": [
+    {"route": "/login", "name": "Login", "purpose": "User authentication with email/password", "auth_required": false},
+    {"route": "/register", "name": "Register", "purpose": "New user registration", "auth_required": false},
+    {"route": "/workspaces", "name": "Workspace List", "purpose": "Home page — list all workspaces user belongs to, option to create new", "auth_required": true},
+    {"route": "/workspaces/new", "name": "Create Workspace", "purpose": "Create a new workspace with name and description", "auth_required": true},
+    {"route": "/workspaces/:workspaceId", "name": "Workspace Dashboard", "purpose": "Shows workspace details, list of projects, member avatars. Main landing after selecting workspace.", "auth_required": true},
+    {"route": "/workspaces/:workspaceId/projects/new", "name": "Create Project", "purpose": "Create a new project within a workspace", "auth_required": true},
+    {"route": "/workspaces/:workspaceId/projects/:projectId", "name": "Project Board", "purpose": "Kanban-style task board for a project. Shows tasks grouped by status (todo, in_progress, done).", "auth_required": true},
+    {"route": "/workspaces/:workspaceId/projects/:projectId/tasks/:taskId", "name": "Task Detail", "purpose": "Full task view with edit capability. Shows title, description, assignee, due date, status, priority.", "auth_required": true},
+    {"route": "/workspaces/:workspaceId/settings", "name": "Workspace Settings", "purpose": "Manage workspace name, description, and members (add/remove).", "auth_required": true},
+    {"route": "/profile", "name": "Profile", "purpose": "View/edit user name, email, password", "auth_required": true}
+  ],
+  "navigation": {
+    "type": "responsive: sidebar on desktop (>=768px), bottom tab bar on mobile (<768px), with top status bar",
+    "links": [
+      {"label": "Workspaces", "path": "/workspaces", "icon": "LayoutGrid", "show_when": "always"},
+      {"label": "Profile", "path": "/profile", "icon": "User", "show_when": "always"}
+    ],
+    "breadcrumbs": "Show on all workspace/project/task pages: Workspace Name > Project Name > Task Title",
+    "secondary_nav": "Within Workspace Dashboard: tabs/side-links for [Projects] [Settings]",
+    "mobile_behavior": "Sidebar collapses to hamburger menu. Bottom nav has: Home, current Workspace, Profile."
+  },
+  "tokens": {
+    "colors": {
+      "primary": "#6366F1",
+      "primary_hover": "#4F46E5",
+      "primary_light": "#EEF2FF",
+      "secondary": "#0EA5E9",
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "danger": "#EF4444",
+      "bg_page": "#F8FAFC",
+      "bg_card": "#FFFFFF",
+      "text_primary": "#1E293B",
+      "text_secondary": "#64748B",
+      "text_muted": "#94A3B8",
+      "border": "#E2E8F0"
+    },
+    "typography": {
+      "heading": "Inter, system-ui, sans-serif",
+      "body": "Inter, system-ui, sans-serif",
+      "mono": "JetBrains Mono, monospace",
+      "sizes": {"h1": "24px", "h2": "20px", "h3": "16px", "body": "14px", "small": "12px"}
+    },
+    "spacing": {
+      "page_padding": {"desktop": "32px", "mobile": "16px"},
+      "card_gap": "16px",
+      "section_gap": "24px",
+      "border_radius": {"card": "12px", "button": "8px", "input": "8px", "badge": "999px"}
+    },
+    "shadows": {
+      "card": "0 1px 3px rgba(0,0,0,0.08)",
+      "elevated": "0 4px 12px rgba(0,0,0,0.1)",
+      "modal": "0 20px 60px rgba(0,0,0,0.15)"
+    }
+  },
+  "wireframes": [
+    {
+      "page": "Login/Register",
+      "layout": "Centered card on full-screen gradient background",
+      "sections": ["Logo/brand at top", "Email input with icon", "Password input with show/hide toggle", "Submit button (full width)", "Link to switch between login/register", "Optional: social login placeholder"],
+      "states": ["Loading spinner on submit", "Error message below form (red)", "Success redirect to /workspaces"]
+    },
+    {
+      "page": "Workspace List",
+      "layout": "Full page with top bar (logo + profile avatar) + main grid area",
+      "sections": ["Top bar with app name 'TeamTodo' and user avatar dropdown", "\"Your Workspaces\" heading with + Create button", "Grid of workspace cards (2 cols desktop, 1 col mobile)", "Each card: workspace name, description preview, member count avatars, 3-dot menu", "Empty state: illustration + text 'No workspaces yet' + CTA button"],
+      "states": ["Loading: skeleton cards (3 shimmer placeholders)", "Empty: friendly illustration with CTA", "Error: retry button"]
+    },
+    {
+      "page": "Workspace Dashboard",
+      "layout": "Sidebar/breadcrumbs at top, content area with project list",
+      "sections": ["Breadcrumb: Workspaces > [Current Workspace]", "Workspace header: name, description, member avatars row, settings gear icon", "Tab bar: Projects | Members (optional) | Settings", "Projects tab: grid of project cards (name, task count, last updated)", "Members shown as avatar circles with + Invite button", "Floating action button (mobile) to create new project"],
+      "states": ["Loading: skeleton cards for projects", "No projects: illustration 'Create your first project'"]
+    },
+    {
+      "page": "Project Board (Kanban)",
+      "layout": "Three-column kanban layout, horizontally scrollable on mobile",
+      "sections": ["Breadcrumb: Workspace > Project Name", "Project header: name, back button, task count, filter/search bar", "Three columns side-by-side: TODO | IN PROGRESS | DONE", "Each column: status header with count, scrollable task card list", "Task cards: title, assignee avatar, due date badge, priority indicator (color dot)", "Drag-and-drop between columns (desktop), tap to move (mobile)", "Floating + button to add task", "Column empty state: dotted border + 'No tasks' text"],
+      "states": ["Loading: three columns with skeleton cards", "Empty column: dashed border placeholder", "Drag active: ghost card, drop target highlight"]
+    },
+    {
+      "page": "Task Detail / Edit",
+      "layout": "Full-page modal (desktop) or full-screen page (mobile) with form fields",
+      "sections": ["Header: status badge, close/back X button", "Title (editable inline)", "Description textarea (Markdown supported)", "Assignee: dropdown/search of workspace members", "Due date: date picker input", "Priority: 3 toggle buttons (Low/Medium/High)", "Status: dropdown (todo/in_progress/done)", "Activity/comment timeline (optional MVP enhancement)", "Save button (top right or bottom sticky)"],
+      "states": ["View mode: read-only fields with Edit button", "Edit mode: all fields editable, Save/Cancel buttons", "Saving: spinner on Save button", "Delete: confirmation dialog"]
+    },
+    {
+      "page": "Workspace Settings",
+      "layout": "Sidebar-style settings page with sections",
+      "sections": ["Back to workspace link", "Settings heading", "Section 1: Workspace Name & Description edit form", "Section 2: Members list (table: avatar, name, email, role, Remove button)", "Add member: email input + Add button", "Danger Zone: Delete Workspace button (with confirmation modal)"]
+    }
+  ],
+  "key_components": [
+    {"name": "Button", "variants": ["primary (filled, bg-primary)", "secondary (outline)", "ghost (no bg/border)", "danger (red)", "icon (icon-only square)"], "states": ["default", "hover", "active", "disabled", "loading (spinner)"]},
+    {"name": "Input", "variants": ["text", "email", "password", "textarea", "select", "date", "search"], "states": ["default", "focused (primary ring)", "error (red ring + message)", "disabled (gray bg)"]},
+    {"name": "Card", "usage": "Workspace cards, Project cards, Task cards", "padding": "16px", "interaction": "hover:shadow elevated, cursor pointer"},
+    {"name": "Task Card", "sections": ["Title (truncated 2 lines)", "Priority dot (green/yellow/red)", "Due date badge (red if overdue)", "Assignee avatar (bottom right)"], "interaction": "drag-and-drop, click opens detail"},
+    {"name": "Kanban Column", "structure": "Header bar (status name + count) + scrollable card list", "scroll": "vertical within column, horizontal columns on mobile"},
+    {"name": "Modal", "usage": "Task detail, confirmations", "backdrop": "semi-transparent black, click outside to close"},
+    {"name": "Avatar", "variants": ["single (user initial + bg color)", "group (overlapping stack)"], "sizes": ["sm (24px)", "md (32px)", "lg (40px)"]},
+    {"name": "Badge", "usage": "Status indicators, role badges", "variants": ["todo (gray)", "in_progress (blue)", "done (green)", "priority-low (green)", "priority-medium (yellow)", "priority-high (red)"]},
+    {"name": "Breadcrumbs", "structure": "Page > Parent > Current > ...", "last_item": "bold, not clickable"},
+    {"name": "Empty State", "structure": "Centered illustration (SVG) + heading text + description + CTA button"},
+    {"name": "Skeleton Loader", "usage": "Placeholder while data loads", "animation": "shimmer (gradient sweep)"}
+  ],
+  "responsive_breakpoints": {
+    "mobile": "< 768px",
+    "tablet": "768px - 1024px",
+    "desktop": "> 1024px",
+    "key_changes": {
+      "mobile": "Bottom nav bar, full-width cards, single column kanban (horizontal scroll), hamburger menu",
+      "desktop": "Sidebar nav, multi-column grid, three-column kanban visible side-by-side"
+    }
+  }
+}

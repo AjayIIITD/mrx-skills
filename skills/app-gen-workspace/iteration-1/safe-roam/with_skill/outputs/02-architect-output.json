@@ -1,0 +1,173 @@
+{
+  "architecture": {
+    "pattern": "Monolithic REST API + React SPA frontend",
+    "reasoning": "Lean MVP approach. All business logic in a single Express server. React SPA communicates via REST. Can extract microservices later if needed. No real-time WebSocket needed yet — polling-based location updates are fine for MVP.",
+    "data_flow": {
+      "auth_flow": "Register → Login → JWT stored in localStorage → Sent via Authorization header on every protected request → Middleware verifies JWT on backend",
+      "sos_flow": "User taps SOS → POST /api/sos with lat/lng → Backend looks up user's emergency contacts → Sends SMS via Twilio + email via Nodemailer → Stores SOS alert record in DB",
+      "tracking_flow": "User starts trip → Frontend polls geolocation every 30s → POST /api/tracks/update → Backend evaluates lat/lng against safe zone polygons from DB → If outside safe zone or in unsafe zone, triggers alert → GET /api/tracks/alerts for frontend polling",
+      "dashboard_flow": "On page load → GET /api/dashboard/stats returns aggregated data: SOS count, trips taken, safe zone encounters, safety score (composite metric)"
+    },
+    "security": {
+      "auth": "JWT (access token, 24h expiry) with bcrypt password hashing",
+      "input_validation": "express-validator on all routes",
+      "cors": "Whitelist frontend origin only",
+      "rate_limiting": "express-rate-limit — 10 req/min on SOS endpoint, 100 req/min on others",
+      "location_data": "Encrypted at rest in DB, HTTPS enforced for all API calls",
+      "helmet": "Standard security headers"
+    }
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "React 18 with Vite",
+      "styling": "Tailwind CSS 3",
+      "state_management": "React Context + useReducer",
+      "maps": "Leaflet (free, no API key needed for basic tiles) or Mapbox GL JS",
+      "http_client": "Axios",
+      "routing": "React Router v6",
+      "notifications": "react-hot-toast for in-app toasts"
+    },
+    "backend": {
+      "runtime": "Node.js 20 LTS",
+      "framework": "Express 4",
+      "language": "JavaScript (ESM) — TypeScript not needed for MVP speed",
+      "sms": "Twilio API",
+      "email": "Nodemailer (SMTP)",
+      "scheduling": "node-cron for periodic checks",
+      "geolocation_utils": "@turf/turf for geofencing polygon math"
+    },
+    "database": {
+      "type": "PostgreSQL 16",
+      "orm": "Prisma ORM",
+      "hosting": "Neon (free tier) or Supabase"
+    },
+    "auth": {
+      "approach": "JWT tokens (access + refresh)",
+      "libraries": "bcryptjs + jsonwebtoken"
+    },
+    "deployment": {
+      "platform": "Vercel (frontend) + Railway/Render (backend)",
+      "database": "Neon PostgreSQL"
+    }
+  },
+  "components": [
+    {
+      "name": "React SPA (Web Client)",
+      "tech": "React + Vite + Tailwind",
+      "responsibility": "All UI rendering, client-side routing, geolocation capture via browser Geolocation API, Leaflet map display",
+      "dependencies": ["API Server"]
+    },
+    {
+      "name": "Express API Server",
+      "tech": "Express + Prisma",
+      "responsibility": "REST endpoints, auth logic, SOS dispatch (SMS/email), route tracking computation, dashboard aggregation",
+      "dependencies": ["Database"]
+    },
+    {
+      "name": "PostgreSQL Database",
+      "tech": "PostgreSQL via Prisma",
+      "responsibility": "User data, emergency contacts, SOS alerts, trip tracks, safe zone definitions, dashboard event logs",
+      "dependencies": []
+    },
+    {
+      "name": "Twilio API (External)",
+      "tech": "Twilio REST API",
+      "responsibility": "Send SMS alerts to emergency contacts on SOS trigger",
+      "dependencies": []
+    },
+    {
+      "name": "SMTP / Nodemailer (External)",
+      "tech": "Nodemailer",
+      "responsibility": "Send email alerts to emergency contacts on SOS trigger",
+      "dependencies": []
+    }
+  ],
+  "api_contracts": [
+    {
+      "endpoint": "POST /api/auth/register",
+      "auth": false,
+      "request": {"body": {"name": "string (required)", "email": "string (required, email)", "password": "string (required, min 6)", "phone": "string (optional)"}},
+      "response": {"token": "string", "user": {"id": "string", "name": "string", "email": "string", "phone": "string"}}
+    },
+    {
+      "endpoint": "POST /api/auth/login",
+      "auth": false,
+      "request": {"body": {"email": "string (required)", "password": "string (required)"}},
+      "response": {"token": "string", "user": {"id": "string", "name": "string", "email": "string"}}
+    },
+    {
+      "endpoint": "GET /api/auth/me",
+      "auth": true,
+      "response": {"user": {"id": "string", "name": "string", "email": "string", "phone": "string", "created_at": "string"}}
+    },
+    {
+      "endpoint": "GET /api/contacts",
+      "auth": true,
+      "response": {"contacts": [{"id": "string", "name": "string", "phone": "string", "email": "string", "relationship": "string"}]}
+    },
+    {
+      "endpoint": "POST /api/contacts",
+      "auth": true,
+      "request": {"body": {"name": "string (required)", "phone": "string (required)", "email": "string (optional)", "relationship": "string (optional)"}},
+      "response": {"contact": {"id": "string", "name": "string", "phone": "string", "email": "string", "relationship": "string"}}
+    },
+    {
+      "endpoint": "DELETE /api/contacts/:id",
+      "auth": true,
+      "response": {"message": "Contact deleted"}
+    },
+    {
+      "endpoint": "POST /api/sos/trigger",
+      "auth": true,
+      "request": {"body": {"latitude": "number (required)", "longitude": "number (required)", "message": "string (optional)"}},
+      "response": {"alert": {"id": "string", "status": "dispatched", "notified_contacts": "number", "timestamp": "string"}}
+    },
+    {
+      "endpoint": "GET /api/sos/history",
+      "auth": true,
+      "response": {"alerts": [{"id": "string", "latitude": "number", "longitude": "number", "status": "string", "created_at": "string"}]}
+    },
+    {
+      "endpoint": "POST /api/tracks/start",
+      "auth": true,
+      "request": {"body": {"start_lat": "number", "start_lng": "number", "end_lat": "number", "end_lng": "number", "destination_name": "string (optional)"}},
+      "response": {"track": {"id": "string", "status": "active", "started_at": "string"}}
+    },
+    {
+      "endpoint": "POST /api/tracks/update",
+      "auth": true,
+      "request": {"body": {"track_id": "string (required)", "latitude": "number (required)", "longitude": "number (required)"}},
+      "response": {"track": {"id": "string", "latitude": "number", "longitude": "number", "safe_zone_status": "safe|caution|unsafe", "alert": "string|null", "updated_at": "string"}}
+    },
+    {
+      "endpoint": "POST /api/tracks/:id/end",
+      "auth": true,
+      "response": {"track": {"id": "string", "status": "completed", "ended_at": "string"}}
+    },
+    {
+      "endpoint": "GET /api/tracks/history",
+      "auth": true,
+      "response": {"tracks": [{"id": "string", "start_lat": "number", "start_lng": "number", "end_lat": "number", "end_lng": "number", "status": "string", "started_at": "string", "ended_at": "string"}]}
+    },
+    {
+      "endpoint": "GET /api/tracks/alerts",
+      "auth": true,
+      "response": {"alerts": [{"id": "string", "track_id": "string", "alert_type": "deviation|unsafe_zone", "message": "string", "created_at": "string", "acknowledged": "boolean"}]}
+    },
+    {
+      "endpoint": "PATCH /api/tracks/alerts/:id/acknowledge",
+      "auth": true,
+      "response": {"alert": {"id": "string", "acknowledged": true}}
+    },
+    {
+      "endpoint": "GET /api/dashboard/stats",
+      "auth": true,
+      "response": {"total_trips": "number", "total_sos_alerts": "number", "safe_zone_alerts_received": "number", "safety_score": "number (0-100)", "recent_activity": [{"type": "trip|sos|alert", "description": "string", "timestamp": "string"}]}
+    },
+    {
+      "endpoint": "GET /api/zones",
+      "auth": true,
+      "response": {"zones": [{"id": "string", "name": "string", "type": "safe|caution|unsafe", "polygon": [[number,number]]}]}
+    }
+  ]
+}

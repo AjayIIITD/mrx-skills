@@ -1,0 +1,112 @@
+{
+  "architecture": {
+    "pattern": "Monolithic Next.js application (API Routes + SSR React)",
+    "reasoning": "Simplest starting point for an MVP. Next.js handles both frontend and API routes, reducing deployment complexity. No separate backend server needed."
+  },
+  "tech_stack": {
+    "frontend": {"framework": "Next.js 14 (App Router)", "styling": "Tailwind CSS", "state": "React Context (cart state)"},
+    "backend": {"runtime": "Node.js (Next.js API Routes)", "language": "TypeScript", "orm": "Prisma"},
+    "database": {"type": "PostgreSQL", "orm": "Prisma"},
+    "auth": {"approach": "NextAuth.js v5 (Auth.js) with credentials provider", "library": "next-auth + bcrypt"},
+    "payments": {"provider": "Stripe", "library": "stripe SDK (stripe npm package)"},
+    "deployment": {"platform": "Vercel (full monolith)"}
+  },
+  "components": [
+    {"name": "Next.js Frontend", "tech": "React Server Components + Client Components", "responsibility": "UI rendering, product pages, cart UI, admin panel"},
+    {"name": "Next.js API Layer", "tech": "Route handlers in app/api/", "responsibility": "All backend logic: CRUD, cart, Stripe checkout, auth"},
+    {"name": "Prisma ORM", "tech": "Prisma Client", "responsibility": "Database access, migrations"},
+    {"name": "PostgreSQL Database", "tech": "PostgreSQL", "responsibility": "Data persistence for products, orders, users, cart items"},
+    {"name": "Stripe", "tech": "Stripe API + Stripe.js", "responsibility": "Payment processing, webhook handling"}
+  ],
+  "data_flow": {
+    "cart_checkout": "Add to cart (client context) → On checkout, create Stripe Checkout Session → Redirect to Stripe → Stripe webhook confirms → Create order in DB → Redirect to success page",
+    "admin_crud": "Admin logs in → Fetches product list → Creates/edits/deletes via API → Prisma updates PostgreSQL"
+  },
+  "security": {
+    "auth": "NextAuth.js with JWT strategy, credentials provider",
+    "admin_gate": "Middleware checks admin role on /api/admin/* and /admin/* routes",
+    "input_validation": "Zod schemas on all API routes",
+    "cors": "Not needed (monolith — same origin)",
+    "stripe_webhooks": "Verify Stripe webhook signatures with signing secret"
+  },
+  "api_contracts": [
+    {
+      "endpoint": "GET /api/products",
+      "description": "List products (paginated, filterable)",
+      "auth": false,
+      "response": {"products": [{"id": "string", "name": "string", "description": "string", "price": "number", "imageUrl": "string", "stock": "number"}], "total": "number", "page": "number"}
+    },
+    {
+      "endpoint": "GET /api/products/[id]",
+      "description": "Get single product",
+      "auth": false,
+      "response": {"id": "string", "name": "string", "description": "string", "price": "number", "imageUrl": "string", "stock": "number", "createdAt": "string"}
+    },
+    {
+      "endpoint": "POST /api/auth/register",
+      "description": "Register new user",
+      "auth": false,
+      "request": {"email": "string", "password": "string", "name": "string"},
+      "response": {"user": {"id": "string", "email": "string", "name": "string"}}
+    },
+    {
+      "endpoint": "POST /api/auth/login",
+      "description": "Login user",
+      "auth": false,
+      "request": {"email": "string", "password": "string"},
+      "response": {"user": {"id": "string", "email": "string", "name": "string", "role": "string"}}
+    },
+    {
+      "endpoint": "POST /api/checkout/create-session",
+      "description": "Create Stripe Checkout Session",
+      "auth": true,
+      "request": {"items": [{"productId": "string", "quantity": "number"}]},
+      "response": {"url": "string"}
+    },
+    {
+      "endpoint": "POST /api/webhooks/stripe",
+      "description": "Stripe webhook handler",
+      "auth": false,
+      "request": "Stripe Event object",
+      "response": {"received": true}
+    },
+    {
+      "endpoint": "GET /api/orders",
+      "description": "List user orders",
+      "auth": true,
+      "response": {"orders": [{"id": "string", "status": "string", "total": "number", "items": [], "createdAt": "string"}]}
+    },
+    {
+      "endpoint": "POST /api/admin/products",
+      "description": "Create product",
+      "auth": "admin",
+      "request": {"name": "string", "description": "string", "price": "number", "imageUrl": "string", "stock": "number"},
+      "response": {"product": {"id": "string", "name": "string", "price": "number"}}
+    },
+    {
+      "endpoint": "PUT /api/admin/products/[id]",
+      "description": "Update product",
+      "auth": "admin",
+      "request": {"name": "string", "description": "string", "price": "number", "imageUrl": "string", "stock": "number"},
+      "response": {"product": {"id": "string", "name": "string", "price": "number"}}
+    },
+    {
+      "endpoint": "DELETE /api/admin/products/[id]",
+      "description": "Delete product",
+      "auth": "admin",
+      "response": {"success": true}
+    },
+    {
+      "endpoint": "GET /api/admin/products",
+      "description": "List all products (admin view)",
+      "auth": "admin",
+      "response": {"products": [{"id": "string", "name": "string", "price": "number", "stock": "number", "createdAt": "string"}]}
+    },
+    {
+      "endpoint": "GET /api/admin/orders",
+      "description": "List all orders (admin view)",
+      "auth": "admin",
+      "response": {"orders": [{"id": "string", "userId": "string", "status": "string", "total": "number", "createdAt": "string"}]}
+    }
+  ]
+}

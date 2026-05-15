@@ -1,0 +1,162 @@
+{
+  "tables": [
+    {
+      "name": "users",
+      "description": "Registered application users",
+      "fields": [
+        {"name": "id", "type": "UUID", "primary": true, "default": "gen_random_uuid()"},
+        {"name": "name", "type": "VARCHAR(100)", "required": true},
+        {"name": "email", "type": "VARCHAR(255)", "unique": true, "required": true},
+        {"name": "password_hash", "type": "VARCHAR(255)", "required": true},
+        {"name": "phone", "type": "VARCHAR(20)", "required": false},
+        {"name": "avatar_url", "type": "TEXT", "required": false},
+        {"name": "created_at", "type": "TIMESTAMPTZ", "default": "NOW()"},
+        {"name": "updated_at", "type": "TIMESTAMPTZ", "default": "NOW()"},
+        {"name": "deleted_at", "type": "TIMESTAMPTZ", "required": false}
+      ]
+    },
+    {
+      "name": "emergency_contacts",
+      "description": "Emergency contacts linked to a user. Notified on SOS trigger.",
+      "fields": [
+        {"name": "id", "type": "UUID", "primary": true, "default": "gen_random_uuid()"},
+        {"name": "user_id", "type": "UUID", "foreign_key": "users.id", "required": true, "on_delete": "CASCADE"},
+        {"name": "name", "type": "VARCHAR(100)", "required": true},
+        {"name": "phone", "type": "VARCHAR(20)", "required": true},
+        {"name": "email", "type": "VARCHAR(255)", "required": false},
+        {"name": "relationship", "type": "VARCHAR(50)", "required": false},
+        {"name": "created_at", "type": "TIMESTAMPTZ", "default": "NOW()"},
+        {"name": "updated_at", "type": "TIMESTAMPTZ", "default": "NOW()"}
+      ]
+    },
+    {
+      "name": "sos_alerts",
+      "description": "Records of SOS alerts triggered by users",
+      "fields": [
+        {"name": "id", "type": "UUID", "primary": true, "default": "gen_random_uuid()"},
+        {"name": "user_id", "type": "UUID", "foreign_key": "users.id", "required": true, "on_delete": "CASCADE"},
+        {"name": "latitude", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "longitude", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "message", "type": "TEXT", "required": false},
+        {"name": "status", "type": "sos_status", "default": "dispatched"},
+        {"name": "contacts_notified", "type": "INTEGER", "default": 0},
+        {"name": "resolved_at", "type": "TIMESTAMPTZ", "required": false},
+        {"name": "created_at", "type": "TIMESTAMPTZ", "default": "NOW()"}
+      ]
+    },
+    {
+      "name": "sos_notifications",
+      "description": "Individual notification delivery records per SOS alert per contact",
+      "fields": [
+        {"name": "id", "type": "UUID", "primary": true, "default": "gen_random_uuid()"},
+        {"name": "sos_alert_id", "type": "UUID", "foreign_key": "sos_alerts.id", "required": true, "on_delete": "CASCADE"},
+        {"name": "contact_id", "type": "UUID", "foreign_key": "emergency_contacts.id", "required": true, "on_delete": "CASCADE"},
+        {"name": "channel", "type": "VARCHAR(10)", "required": true},
+        {"name": "status", "type": "notification_status", "default": "pending"},
+        {"name": "delivered_at", "type": "TIMESTAMPTZ", "required": false},
+        {"name": "created_at", "type": "TIMESTAMPTZ", "default": "NOW()"}
+      ]
+    },
+    {
+      "name": "tracks",
+      "description": "Tracked trips/routes a user has taken",
+      "fields": [
+        {"name": "id", "type": "UUID", "primary": true, "default": "gen_random_uuid()"},
+        {"name": "user_id", "type": "UUID", "foreign_key": "users.id", "required": true, "on_delete": "CASCADE"},
+        {"name": "start_lat", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "start_lng", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "end_lat", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "end_lng", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "destination_name", "type": "VARCHAR(200)", "required": false},
+        {"name": "status", "type": "track_status", "default": "active"},
+        {"name": "started_at", "type": "TIMESTAMPTZ", "default": "NOW()"},
+        {"name": "ended_at", "type": "TIMESTAMPTZ", "required": false},
+        {"name": "updated_at", "type": "TIMESTAMPTZ", "default": "NOW()"}
+      ]
+    },
+    {
+      "name": "track_locations",
+      "description": "Individual location pings during a trip. Written every 30s during active tracking.",
+      "fields": [
+        {"name": "id", "type": "BIGSERIAL", "primary": true},
+        {"name": "track_id", "type": "UUID", "foreign_key": "tracks.id", "required": true, "on_delete": "CASCADE"},
+        {"name": "latitude", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "longitude", "type": "DECIMAL(10,7)", "required": true},
+        {"name": "zone_status", "type": "zone_status", "default": "safe"},
+        {"name": "recorded_at", "type": "TIMESTAMPTZ", "default": "NOW()"}
+      ]
+    },
+    {
+      "name": "track_alerts",
+      "description": "Alerts generated during a trip (deviation from route, entering unsafe zone)",
+      "fields": [
+        {"name": "id", "type": "UUID", "primary": true, "default": "gen_random_uuid()"},
+        {"name": "track_id", "type": "UUID", "foreign_key": "tracks.id", "required": true, "on_delete": "CASCADE"},
+        {"name": "alert_type", "type": "alert_type", "required": true},
+        {"name": "latitude", "type": "DECIMAL(10,7)", "required": false},
+        {"name": "longitude", "type": "DECIMAL(10,7)", "required": false},
+        {"name": "message", "type": "TEXT", "required": true},
+        {"name": "acknowledged", "type": "BOOLEAN", "default": false},
+        {"name": "acknowledged_at", "type": "TIMESTAMPTZ", "required": false},
+        {"name": "created_at", "type": "TIMESTAMPTZ", "default": "NOW()"}
+      ]
+    },
+    {
+      "name": "safe_zones",
+      "description": "Predefined geographic polygons marking safe/caution/unsafe areas in Delhi",
+      "fields": [
+        {"name": "id", "type": "UUID", "primary": true, "default": "gen_random_uuid()"},
+        {"name": "name", "type": "VARCHAR(200)", "required": true},
+        {"name": "zone_type", "type": "zone_status", "required": true},
+        {"name": "description", "type": "TEXT", "required": false},
+        {"name": "polygon", "type": "JSONB", "required": true},
+        {"name": "is_active", "type": "BOOLEAN", "default": true},
+        {"name": "created_at", "type": "TIMESTAMPTZ", "default": "NOW()"},
+        {"name": "updated_at", "type": "TIMESTAMPTZ", "default": "NOW()"}
+      ]
+    }
+  ],
+  "enums": [
+    {"name": "sos_status", "values": ["dispatched", "resolved", "false_alarm"]},
+    {"name": "track_status", "values": ["active", "completed", "cancelled"]},
+    {"name": "zone_status", "values": ["safe", "caution", "unsafe"]},
+    {"name": "alert_type", "values": ["zone_entry", "zone_exit", "deviation", "prolonged_stay"]},
+    {"name": "notification_status", "values": ["pending", "delivered", "failed"]}
+  ],
+  "relationships": [
+    {"from": "emergency_contacts.user_id", "to": "users.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "sos_alerts.user_id", "to": "users.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "sos_notifications.sos_alert_id", "to": "sos_alerts.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "sos_notifications.contact_id", "to": "emergency_contacts.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "tracks.user_id", "to": "users.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "track_locations.track_id", "to": "tracks.id", "type": "many-to-one", "on_delete": "CASCADE"},
+    {"from": "track_alerts.track_id", "to": "tracks.id", "type": "many-to-one", "on_delete": "CASCADE"}
+  ],
+  "indexes": [
+    {"table": "users", "fields": ["email"], "type": "UNIQUE BTREE", "purpose": "Fast login lookup"},
+    {"table": "emergency_contacts", "fields": ["user_id"], "type": "BTREE", "purpose": "Get all contacts for a user"},
+    {"table": "sos_alerts", "fields": ["user_id", "created_at"], "type": "BTREE", "purpose": "User SOS history sorted by date"},
+    {"table": "sos_alerts", "fields": ["status"], "type": "BTREE", "purpose": "Filter by alert status"},
+    {"table": "sos_notifications", "fields": ["sos_alert_id"], "type": "BTREE", "purpose": "Get notifications for an alert"},
+    {"table": "sos_notifications", "fields": ["status"], "type": "BTREE", "purpose": "Retry failed notifications"},
+    {"table": "tracks", "fields": ["user_id", "started_at"], "type": "BTREE", "purpose": "User trip history sorted by date"},
+    {"table": "tracks", "fields": ["status"], "type": "BTREE", "purpose": "Find active trips"},
+    {"table": "track_locations", "fields": ["track_id", "recorded_at"], "type": "BTREE", "purpose": "Get location history for a trip"},
+    {"table": "track_locations", "fields": ["zone_status"], "type": "BTREE", "purpose": "Filter locations by zone status"},
+    {"table": "track_alerts", "fields": ["track_id", "created_at"], "type": "BTREE", "purpose": "Get alerts for a trip"},
+    {"table": "track_alerts", "fields": ["acknowledged"], "type": "BTREE", "purpose": "Find unresolved alerts"},
+    {"table": "safe_zones", "fields": ["zone_type", "is_active"], "type": "BTREE", "purpose": "Filter active zones by type"}
+  ],
+  "seed_data": {
+    "safe_zones": [
+      {"name": "Connaught Place", "zone_type": "safe", "description": "Central business district, well-lit, high police presence", "polygon": "[[28.6280,77.2080],[28.6340,77.2220],[28.6270,77.2260],[28.6220,77.2130]]"},
+      {"name": "India Gate - Lutyens Delhi", "zone_type": "safe", "description": "High security zone with continuous police patrolling", "polygon": "[[28.6080,77.2290],[28.6140,77.2380],[28.6070,77.2430],[28.6010,77.2340]]"},
+      {"name": "Saket - Select CITYWALK", "zone_type": "safe", "description": "Commercial area with good lighting and security", "polygon": "[[28.5220,77.2130],[28.5280,77.2210],[28.5210,77.2240],[28.5160,77.2160]]"},
+      {"name": "Dwarka Sector 6-12", "zone_type": "caution", "description": "Residential area, moderately lit, moderate foot traffic after 10 PM", "polygon": "[[28.5880,77.0380],[28.5960,77.0500],[28.5870,77.0550],[28.5800,77.0430]]"},
+      {"name": "Old Delhi (Chandni Chowk area)", "zone_type": "caution", "description": "Dense narrow lanes, crowded but can be unsafe after dark", "polygon": "[[28.6540,77.2260],[28.6600,77.2360],[28.6520,77.2410],[28.6470,77.2310]]"},
+      {"name": "Mahipalpur - Rangpuri", "zone_type": "unsafe", "description": "Isolated stretches near airport, poorly lit, low foot traffic", "polygon": "[[28.5400,77.1160],[28.5480,77.1250],[28.5400,77.1300],[28.5320,77.1200]]"},
+      {"name": "Najafgarh Road Border Areas", "zone_type": "unsafe", "description": "Outer Delhi area with low police presence after dark", "polygon": "[[28.6120,76.9860],[28.6200,76.9960],[28.6110,77.0020],[28.6040,76.9900]]"}
+    ],
+    "note": "These are illustrative geofence zones for MVP. In production, zones should be curated with Delhi Police data and community inputs."
+  }
+}

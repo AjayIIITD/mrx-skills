@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "eval_name": "ecommerce-mvp",
+  "prompt": "I want to build a simple e-commerce site. Just an MVP — products page, cart, checkout with Stripe, and an admin panel to manage products. Tech stack: Next.js + Prisma + PostgreSQL. Keep it simple, can be a monolith.",
+  "assertions": [
+    {"name": "has-merged-plan", "text": "Output includes a merged/unified plan file", "type": "file_exists", "target": "*merged*plan*"},
+    {"name": "has-codegen-prompt", "text": "Output includes a final codegen prompt file", "type": "file_exists", "target": "*codegen*prompt*"},
+    {"name": "respects-user-stack", "text": "Output uses the user-specified tech stack (Next.js + Prisma)", "type": "content_check", "target": ["Next.js", "Prisma", "NextAuth", "Stripe"]},
+    {"name": "has-database-schema", "text": "Output includes database schema definitions", "type": "content_check", "target": ["schema", "model", "table", "Prisma"]},
+    {"name": "has-api-routes", "text": "Output lists API endpoints", "type": "content_check", "target": ["/api/", "endpoint", "route"]},
+    {"name": "has-ui-pages", "text": "Output describes UI pages and components", "type": "content_check", "target": ["page", "component", "layout"]},
+    {"name": "has-orchestrator-plan", "text": "Output includes an orchestrator/feature plan (with-skill only)", "type": "file_exists", "target": "*orchestrator*"}
+  ]
+}
